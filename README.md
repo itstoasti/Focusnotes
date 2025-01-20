@@ -1,4 +1,4 @@
-# Biolink
+# LinkInBio
 
 A modern bio link generator built with Nuxt.js. Create beautiful, customizable link pages for your social media profiles.
 
@@ -25,8 +25,8 @@ A modern bio link generator built with Nuxt.js. Create beautiful, customizable l
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/biolink.git
-cd biolink
+git clone https://github.com/itstoasti/linkinbio.git
+cd linkinbio
 ```
 
 2. Install dependencies:
