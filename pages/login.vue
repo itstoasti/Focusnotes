@@ -78,7 +78,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 const client = useSupabaseClient()
 const user = useSupabaseUser()
 
@@ -97,8 +97,7 @@ const handleLogin = async () => {
     
     if (error) throw error
     
-    // Redirect to editor on successful login
-    navigateTo('/editor')
+    navigateTo('/home')
   } catch (error) {
     alert(error.message)
   } finally {
@@ -109,7 +108,7 @@ const handleLogin = async () => {
 // Redirect to editor if already logged in
 watchEffect(() => {
   if (user.value) {
-    navigateTo('/editor')
+    navigateTo('/home')
   }
 })
 </script> 

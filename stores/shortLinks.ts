@@ -18,7 +18,8 @@ export const useShortLinkStore = defineStore('shortLinks', {
           .from('short_links')
           .insert({
             id: shortId,
-            long_url: longUrl
+            long_url: longUrl,
+            clicks: 0
           })
           .select()
           .single()
@@ -32,10 +33,30 @@ export const useShortLinkStore = defineStore('shortLinks', {
       }
     },
 
+    async updateNickname(linkId: string, nickname: string) {
+      const client = useSupabaseClient<Database>()
+
+      try {
+        const { data, error } = await client
+          .from('short_links')
+          .update({ nickname: nickname.trim() })
+          .eq('id', linkId)
+          .select()
+          .single()
+
+        if (error) throw error
+        return data
+      } catch (error) {
+        console.error('Error updating nickname:', error)
+        throw error
+      }
+    },
+
     async getLongUrl(shortId: string) {
       const client = useSupabaseClient<Database>()
 
       try {
+        // First get the long URL
         const { data, error } = await client
           .from('short_links')
           .select('long_url')
@@ -43,6 +64,14 @@ export const useShortLinkStore = defineStore('shortLinks', {
           .single()
 
         if (error) throw error
+
+        // Then increment the click count using RPC
+        const { error: updateError } = await client
+          .rpc('increment_clicks', { link_id: shortId })
+
+        if (updateError) {
+          console.error('Error incrementing clicks:', updateError)
+        }
         
         return data?.long_url
       } catch (error) {

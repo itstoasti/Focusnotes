@@ -24,7 +24,7 @@
           
           <div class="space-y-2 mt-4">
             <NuxtLink
-              to="/"
+              to="/home"
               class="flex items-center space-x-2 p-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100"
             >
               <Icon icon="ph:house-bold" class="h-5 w-5" />
@@ -40,6 +40,14 @@
             </NuxtLink>
 
             <NuxtLink
+              to="/links"
+              class="flex items-center space-x-2 p-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100"
+            >
+              <Icon icon="ph:link-bold" class="h-5 w-5" />
+              <span>My Links</span>
+            </NuxtLink>
+
+            <NuxtLink
               to="/analytics"
               class="flex items-center space-x-2 p-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100"
             >
@@ -48,11 +56,11 @@
             </NuxtLink>
 
             <NuxtLink
-              to="/links"
+              to="/settings"
               class="flex items-center space-x-2 p-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100"
             >
-              <Icon icon="ph:link-bold" class="h-5 w-5" />
-              <span>My Links</span>
+              <Icon icon="ph:gear-six-bold" class="h-5 w-5" />
+              <span>Settings</span>
             </NuxtLink>
           </div>
         </div>

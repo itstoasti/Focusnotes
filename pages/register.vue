@@ -82,16 +82,19 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+// Auth
 const client = useSupabaseClient()
 const user = useSupabaseUser()
 
+// Form data
 const name = ref('')
 const email = ref('')
 const password = ref('')
 const passwordConfirm = ref('')
 const loading = ref(false)
 
+// Handle registration
 const handleRegister = async () => {
   if (password.value !== passwordConfirm.value) {
     alert('Passwords do not match')
@@ -112,8 +115,7 @@ const handleRegister = async () => {
     
     if (error) throw error
     
-    // Redirect to editor on successful registration
-    navigateTo('/editor')
+    navigateTo('/home')
   } catch (error) {
     alert(error.message)
   } finally {
@@ -121,10 +123,10 @@ const handleRegister = async () => {
   }
 }
 
-// Redirect to editor if already logged in
+// Redirect if already logged in
 watchEffect(() => {
   if (user.value) {
-    navigateTo('/editor')
+    navigateTo('/home')
   }
 })
 </script> 

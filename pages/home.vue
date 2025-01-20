@@ -1,87 +1,88 @@
 # Create a new home page with a dashboard layout
 <template>
-  <div class="h-screen w-full grid grid-cols-[16rem_1fr] divide-x">
+  <div class="h-screen w-full">
+    <!-- Sidebar -->
     <AppSidebar />
-    
+
     <!-- Main Content -->
-    <div class="bg-slate-100 overflow-y-auto">
-      <div class="max-w-4xl mx-auto py-8 px-6">
-        <!-- Header -->
-        <div class="mb-8">
-          <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p class="mt-1 text-sm text-gray-500">Welcome back, {{ user?.email }}</p>
+    <div class="bg-slate-50 min-h-screen">
+      <!-- Header -->
+      <div class="border-b bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between items-center py-4">
+            <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+          </div>
         </div>
+      </div>
 
-        <!-- Quick Actions -->
-        <div class="grid grid-cols-2 gap-4 mb-8">
-          <NuxtLink
-            to="/editor"
-            class="flex items-center justify-between p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div>
-              <h3 class="text-lg font-medium text-gray-900">Create New Link</h3>
-              <p class="mt-1 text-sm text-gray-500">Create a new biolink or store page</p>
-            </div>
-            <Icon icon="ph:plus-circle-bold" class="h-8 w-8 text-indigo-600" />
-          </NuxtLink>
-
-          <NuxtLink
-            to="/analytics"
-            class="flex items-center justify-between p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div>
-              <h3 class="text-lg font-medium text-gray-900">View Analytics</h3>
-              <p class="mt-1 text-sm text-gray-500">Check your links performance</p>
-            </div>
-            <Icon icon="ph:chart-line-up-bold" class="h-8 w-8 text-indigo-600" />
-          </NuxtLink>
-        </div>
-
-        <!-- Recent Links -->
-        <div class="bg-white rounded-lg shadow-sm p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-medium text-gray-900">Recent Links</h2>
-            <NuxtLink 
-              to="/links"
-              class="text-sm text-indigo-600 hover:text-indigo-700"
-            >
-              View all
-            </NuxtLink>
-          </div>
-
-          <!-- Loading State -->
-          <div v-if="loading" class="flex items-center justify-center h-32">
-            <div class="flex items-center space-x-2 text-gray-500">
-              <Icon icon="ph:circle-notch-bold" class="h-5 w-5 animate-spin" />
-              <span>Loading links...</span>
-            </div>
-          </div>
-
-          <!-- Empty State -->
-          <div v-else-if="recentLinks.length === 0" class="text-center py-8">
-            <p class="text-sm text-gray-500">No links created yet</p>
-          </div>
-
-          <!-- Links List -->
-          <div v-else class="space-y-4">
-            <div
-              v-for="link in recentLinks"
-              :key="link.id"
-              class="flex items-center justify-between py-3 border-b last:border-0"
-            >
-              <div>
-                <h3 class="font-medium text-gray-900">
-                  {{ link.nickname || 'Untitled Link' }}
-                </h3>
-                <p class="mt-1 text-sm text-gray-500">
-                  {{ shortUrl(link.id) }}
-                </p>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Quick Stats -->
+          <div class="bg-white rounded-lg border p-6 space-y-4">
+            <h2 class="text-lg font-medium text-gray-900">Quick Stats</h2>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="text-sm text-gray-500">Total Links</div>
+                <div class="text-2xl font-semibold text-gray-900">{{ data.ls.length }}</div>
               </div>
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="text-sm text-gray-500">Active Template</div>
+                <div class="text-2xl font-semibold text-gray-900 capitalize">{{ data.template }}</div>
+              </div>
+            </div>
+
+            <!-- Top Clicked Links -->
+            <div class="mt-6">
+              <h3 class="text-sm font-medium text-gray-900 mb-3">Top Clicked Links</h3>
+              <div class="space-y-3">
+                <div v-if="topLinks.length === 0" class="text-sm text-gray-500 text-center py-4">
+                  No published links yet
+                </div>
+                <div
+                  v-for="link in topLinks"
+                  :key="link.id"
+                  class="bg-gray-50 p-3 rounded-lg flex items-center justify-between"
+                >
+                  <div class="min-w-0">
+                    <div class="text-sm font-medium text-gray-900 truncate">
+                      {{ link.nickname || 'Untitled Link' }}
+                    </div>
+                    <div class="text-xs text-gray-500 truncate">
+                      {{ shortUrl(link.id) }}
+                    </div>
+                  </div>
+                  <div class="text-sm font-medium text-gray-900">
+                    {{ link.clicks }} clicks
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="bg-white rounded-lg border p-6 space-y-4">
+            <h2 class="text-lg font-medium text-gray-900">Quick Actions</h2>
+            <div class="space-y-3">
               <button
-                @click="copyLink(link.id)"
-                class="p-2 text-gray-400 hover:text-gray-600"
+                @click="navigateTo('/editor')"
+                class="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
               >
-                <Icon icon="ph:copy-bold" class="h-5 w-5" />
+                <Icon icon="ph:plus-circle-bold" class="h-5 w-5 mr-2" />
+                Create Link
+              </button>
+              <button
+                @click="navigateTo('/links')"
+                class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+              >
+                <Icon icon="ph:link-bold" class="h-5 w-5 mr-2" />
+                My Links
+              </button>
+              <button
+                @click="navigateTo('/analytics')"
+                class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+              >
+                <Icon icon="ph:chart-line-up-bold" class="h-5 w-5 mr-2" />
+                Analytics
               </button>
             </div>
           </div>
@@ -104,19 +105,67 @@ definePageMeta({
 })
 
 interface Link {
-  id: string
-  long_url: string
-  nickname?: string
-  created_at: string
+  l: string
+  u: string
+  i?: string
+  img?: string
+  price?: string
+  description?: string
 }
 
-const recentLinks = ref<Link[]>([])
-const loading = ref(true)
+interface FormData {
+  n: string
+  d: string
+  i: string
+  f: string
+  t: string
+  ig: string
+  gh: string
+  tg: string
+  l: string
+  e: string
+  w: string
+  y: string
+  ls: Link[]
+  template: 'simple' | 'store'
+}
+
+const data = ref<FormData>({
+  n: "",
+  d: "",
+  i: "",
+  f: "",
+  t: "",
+  ig: "",
+  gh: "",
+  tg: "",
+  l: "",
+  e: "",
+  w: "",
+  y: "",
+  ls: [],
+  template: "simple",
+});
+
+interface PublishedLink {
+  id: string
+  nickname?: string
+  clicks: number
+}
+
+const topLinks = ref<PublishedLink[]>([])
 const origin = ref('')
 
 // Get origin on client-side only
 onMounted(() => {
   origin.value = window.location.origin
+  fetchTopLinks()
+  
+  // Refresh every 30 seconds
+  const interval = setInterval(fetchTopLinks, 30000)
+  
+  // Clean up interval on component unmount
+  onUnmounted(() => clearInterval(interval))
 })
 
 // Generate short URL
@@ -124,28 +173,21 @@ const shortUrl = (id: string) => {
   return `${origin.value}/s/${id}`
 }
 
-// Fetch recent links on mount
-onMounted(async () => {
+// Fetch top clicked links
+const fetchTopLinks = async () => {
   try {
     const { data, error } = await client
       .from('short_links')
-      .select('*')
-      .order('created_at', { ascending: false })
+      .select('id, nickname, clicks')
+      .order('clicks', { ascending: false })
       .limit(5)
 
     if (error) throw error
-    recentLinks.value = data
+    
+    // Filter out links with 0 clicks
+    topLinks.value = data.filter(link => link.clicks > 0)
   } catch (error) {
-    console.error('Error fetching links:', error)
-  } finally {
-    loading.value = false
+    console.error('Error fetching top links:', error)
   }
-})
-
-// Copy link to clipboard
-const copyLink = async (id: string) => {
-  const url = shortUrl(id)
-  await navigator.clipboard.writeText(url)
-  alert('Link copied to clipboard!')
 }
 </script> 

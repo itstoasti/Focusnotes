@@ -1,9 +1,9 @@
 <template>
-  <div class="h-screen w-full grid grid-cols-[16rem_1fr] divide-x">
+  <div class="h-screen w-full">
     <AppSidebar />
     
     <!-- Main Content -->
-    <div class="bg-slate-100 overflow-y-auto">
+    <div class="bg-slate-50 min-h-screen">
       <div class="max-w-4xl mx-auto py-8 px-6">
         <!-- Header -->
         <div class="flex items-center justify-between mb-8">
@@ -171,18 +171,13 @@ const editNickname = async (link: Link) => {
   }
   
   try {
-    const { data, error } = await client
-      .from('short_links')
-      .update({ nickname: nickname.trim() })
-      .eq('id', link.id)
-      .select()
-
-    if (error) throw error
+    const shortLinks = useShortLinkStore()
+    const updatedLink = await shortLinks.updateNickname(link.id, nickname)
 
     // Update local state with the returned data
     const index = links.value.findIndex(l => l.id === link.id)
-    if (index !== -1 && data?.[0]) {
-      links.value[index] = data[0]
+    if (index !== -1 && updatedLink) {
+      links.value[index] = updatedLink
     }
   } catch (error) {
     console.error('Error updating nickname:', error)
