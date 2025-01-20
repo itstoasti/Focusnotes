@@ -4,106 +4,88 @@
     
     <!-- Main Content -->
     <div class="bg-slate-50 min-h-screen">
-      <div class="max-w-4xl mx-auto py-8 px-6">
-        <!-- Header -->
-        <div class="flex items-center justify-between mb-8">
-          <div>
+      <div class="border-b bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between items-center py-4">
             <h1 class="text-2xl font-bold text-gray-900">My Links</h1>
-            <p class="mt-1 text-sm text-gray-500">Manage your shortened links</p>
-          </div>
-          <NuxtLink
-            to="/editor"
-            class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors"
-          >
-            <Icon icon="ph:plus-bold" class="h-4 w-4 mr-2" />
-            Create New Link
-          </NuxtLink>
-        </div>
-
-        <!-- Loading State -->
-        <div v-if="loading" class="flex items-center justify-center h-64">
-          <div class="flex items-center space-x-2 text-gray-500">
-            <Icon icon="ph:circle-notch-bold" class="h-5 w-5 animate-spin" />
-            <span>Loading links...</span>
-          </div>
-        </div>
-
-        <!-- Empty State -->
-        <div v-else-if="links.length === 0" class="bg-white rounded-lg shadow-sm p-8 text-center">
-          <div class="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-indigo-100">
-            <Icon icon="ph:link-break-bold" class="h-6 w-6 text-indigo-600" />
-          </div>
-          <h3 class="mt-4 text-sm font-medium text-gray-900">No links yet</h3>
-          <p class="mt-1 text-sm text-gray-500">Get started by creating your first link</p>
-          <div class="mt-6">
             <NuxtLink
               to="/editor"
-              class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors"
+              class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
             >
-              <Icon icon="ph:plus-bold" class="h-4 w-4 mr-2" />
+              <Icon icon="ph:plus-bold" class="h-5 w-5 mr-2" />
               Create New Link
             </NuxtLink>
           </div>
         </div>
+      </div>
 
-        <!-- Links Grid -->
-        <div v-else class="grid gap-4">
-          <div
-            v-for="link in links"
-            :key="link.id"
-            class="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow"
-          >
-            <div class="space-y-4">
-              <!-- Link Info -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Links List -->
+        <div class="bg-white shadow rounded-lg divide-y">
+          <div v-for="link in links" :key="link.id" class="p-6">
+            <div class="flex items-center justify-between">
               <div>
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center space-x-3 flex-1">
-                    <h2 class="text-lg font-medium text-gray-900">
-                      {{ link.nickname || 'Untitled Link' }}
-                    </h2>
-                    <button
-                      @click="editNickname(link)"
-                      class="text-gray-400 hover:text-gray-600"
-                    >
-                      <Icon icon="ph:pencil-simple-bold" class="h-4 w-4" />
-                    </button>
-                  </div>
-                  <span class="ml-4 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                    {{ new Date(link.created_at).toLocaleDateString() }}
+                <h3 class="text-lg font-medium text-gray-900">{{ link.data.n }}</h3>
+                <p class="mt-1 text-sm text-gray-500">{{ link.data.d }}</p>
+                <div class="mt-2 flex items-center space-x-4">
+                  <span class="text-sm text-gray-500">
+                    {{ formatDate(link.created_at) }}
+                  </span>
+                  <span class="text-sm text-gray-500">
+                    {{ link.clicks }} clicks
+                  </span>
+                  <span 
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                    :class="{
+                      'bg-green-100 text-green-800': link.data.template === 'simple',
+                      'bg-blue-100 text-blue-800': link.data.template === 'store',
+                      'bg-purple-100 text-purple-800': link.data.template === 'blog'
+                    }"
+                  >
+                    {{ link.data.template }}
                   </span>
                 </div>
-                <div class="mt-2 flex items-center text-sm text-gray-500">
-                  <Icon icon="ph:link-bold" class="h-4 w-4 mr-2" />
-                  {{ shortUrl(link.id) }}
-                </div>
               </div>
-
-              <!-- Actions -->
-              <div class="flex items-center space-x-4 pt-4 border-t">
-                <a
-                  :href="shortUrl(link.id)"
-                  target="_blank"
-                  class="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-700"
-                >
-                  <Icon icon="ph:arrow-square-out-bold" class="h-4 w-4 mr-1" />
-                  Open Link
-                </a>
+              <div class="flex items-center space-x-4">
                 <button
-                  @click="copyLink(link.id)"
-                  class="inline-flex items-center text-sm text-gray-600 hover:text-gray-700"
+                  @click="editLink(link)"
+                  class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
                 >
-                  <Icon icon="ph:copy-bold" class="h-4 w-4 mr-1" />
-                  Copy URL
+                  <Icon icon="ph:pencil-bold" class="h-5 w-5 mr-2" />
+                  Edit
+                </button>
+                <button
+                  @click="copyLink(link.short_id)"
+                  class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                >
+                  <Icon icon="ph:link-bold" class="h-5 w-5 mr-2" />
+                  Copy Link
                 </button>
                 <button
                   @click="deleteLink(link.id)"
-                  class="inline-flex items-center text-sm text-red-600 hover:text-red-700 ml-auto"
+                  class="inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50"
                 >
-                  <Icon icon="ph:trash-bold" class="h-4 w-4 mr-1" />
+                  <Icon icon="ph:trash-bold" class="h-5 w-5 mr-2" />
                   Delete
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- No Links Message -->
+        <div v-if="links.length === 0" class="text-center py-12">
+          <Icon icon="ph:link-break-bold" class="mx-auto h-12 w-12 text-gray-400" />
+          <h3 class="mt-2 text-sm font-medium text-gray-900">No links</h3>
+          <p class="mt-1 text-sm text-gray-500">Get started by creating a new link.</p>
+          <div class="mt-6">
+            <NuxtLink
+              to="/editor"
+              class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+            >
+              <Icon icon="ph:plus-bold" class="h-5 w-5 mr-2" />
+              Create New Link
+            </NuxtLink>
           </div>
         </div>
       </div>
@@ -113,102 +95,100 @@
 
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
+import { useShortLinkStore } from '~/stores/shortLinks'
 
-// Auth
 const client = useSupabaseClient()
 const user = useSupabaseUser()
+const router = useRouter()
 
-// Define middleware
 definePageMeta({
   middleware: ['auth']
 })
 
-interface Link {
-  id: string
-  long_url: string
-  nickname?: string
-  created_at: string
-}
-
-const links = ref<Link[]>([])
-const loading = ref(true)
-const origin = ref('')
-
-// Get origin on client-side only
-onMounted(() => {
-  origin.value = window.location.origin
-})
-
-// Generate short URL
-const shortUrl = (id: string) => {
-  return `${origin.value}/s/${id}`
-}
-
-// Fetch links on mount
-onMounted(async () => {
-  try {
-    const { data, error } = await client
-      .from('short_links')
-      .select('*')
-      .order('created_at', { ascending: false })
-
-    if (error) throw error
-    links.value = data
-  } catch (error) {
-    console.error('Error fetching links:', error)
-  } finally {
-    loading.value = false
-  }
-})
-
-// Edit nickname
-const editNickname = async (link: Link) => {
-  const nickname = prompt('Enter a nickname for this link:', link.nickname)
-  if (nickname === null) return // User cancelled
-  if (nickname.trim() === '') {
-    alert('Nickname cannot be empty')
+// Get all links for the current user
+const links = ref([])
+const fetchLinks = async () => {
+  const userId = user.value?.id
+  console.log('Current user ID:', userId)
+  
+  if (!userId) {
+    console.log('No user ID found, user might not be logged in')
     return
   }
   
-  try {
-    const shortLinks = useShortLinkStore()
-    const updatedLink = await shortLinks.updateNickname(link.id, nickname)
-
-    // Update local state with the returned data
-    const index = links.value.findIndex(l => l.id === link.id)
-    if (index !== -1 && updatedLink) {
-      links.value[index] = updatedLink
-    }
-  } catch (error) {
-    console.error('Error updating nickname:', error)
-    alert('Failed to update nickname. Please try again.')
+  console.log('Fetching links for user:', userId)
+  
+  const { data, error } = await client
+    .from('links')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+  
+  if (error) {
+    console.error('Error fetching links:', error.message)
+    return
   }
+  
+  console.log('Fetched links:', data)
+  links.value = data || []
 }
 
-// Copy link to clipboard
-const copyLink = async (id: string) => {
-  const url = shortUrl(id)
-  await navigator.clipboard.writeText(url)
-  alert('Link copied to clipboard!')
+// Load links on mount and when user changes
+watch(() => user.value?.id, (newId) => {
+  console.log('User ID changed:', newId)
+  if (newId) {
+    fetchLinks()
+  }
+})
+
+onMounted(() => {
+  if (user.value?.id) {
+    fetchLinks()
+  }
+})
+
+// Format date
+const formatDate = (date: string) => {
+  return new Date(date).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  })
+}
+
+// Edit link
+const editLink = (link) => {
+  // Navigate to editor with link data
+  router.push({
+    path: '/editor',
+    query: { edit: link.id }
+  })
+}
+
+// Copy link
+const copyLink = (shortId: string) => {
+  const url = `${window.location.origin}/s/${shortId}`
+  navigator.clipboard.writeText(url).then(() => {
+    alert('Link copied to clipboard!')
+  })
 }
 
 // Delete link
 const deleteLink = async (id: string) => {
   if (!confirm('Are you sure you want to delete this link?')) return
-
-  try {
-    const { error } = await client
-      .from('short_links')
-      .delete()
-      .eq('id', id)
-
-    if (error) throw error
-
-    // Remove link from local state
-    links.value = links.value.filter(link => link.id !== id)
-  } catch (error) {
+  
+  const { error } = await client
+    .from('links')
+    .delete()
+    .match({ id })
+  
+  if (error) {
     console.error('Error deleting link:', error)
-    alert('Failed to delete link. Please try again.')
+    alert('Error deleting link')
+    return
   }
+  
+  // Refresh links list
+  fetchLinks()
 }
 </script> 

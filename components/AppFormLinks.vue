@@ -1,7 +1,13 @@
 <template>
   <div class="space-y-4">
     <div class="flex items-center justify-between mb-4">
-      <h2 class="text-lg font-medium text-gray-900">Links</h2>
+      <div>
+        <h2 class="text-lg font-medium text-gray-900">Links</h2>
+        <p class="mt-1 text-sm text-gray-500">
+          Icon keys can be found at
+          <a href="https://icones.js.org" target="_blank" class="text-indigo-600 hover:text-indigo-500">icones.js.org</a>
+        </p>
+      </div>
       <button
         type="button"
         @click="addLink"

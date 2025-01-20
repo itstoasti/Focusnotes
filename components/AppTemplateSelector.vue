@@ -1,82 +1,88 @@
 <template>
-  <div class="space-y-4">
-    <h2 class="text-lg font-medium text-gray-900">Choose Template</h2>
-    <div class="grid grid-cols-2 gap-4 max-w-lg">
+  <base-form-section
+    title="Template"
+    description="Choose a template for your page"
+  >
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
       <!-- Simple Template -->
-      <button
-        @click="selectTemplate('simple')"
-        class="relative aspect-[4/5] rounded-lg border-2 overflow-hidden hover:border-indigo-500 transition-colors"
-        :class="modelValue === 'simple' ? 'border-indigo-500 ring-2 ring-indigo-500 ring-offset-2' : 'border-gray-200'"
+      <div
+        class="relative flex cursor-pointer rounded-lg border bg-white p-4 shadow-sm focus:outline-none"
+        :class="modelValue === 'simple' ? 'border-indigo-500 ring-2 ring-indigo-500' : 'border-gray-300'"
+        @click="$emit('update:modelValue', 'simple')"
       >
-        <div class="absolute inset-0 bg-white">
-          <div class="p-3 space-y-2">
-            <div class="w-12 h-12 mx-auto rounded-full bg-gray-100"></div>
-            <div class="h-3 w-20 mx-auto bg-gray-100 rounded"></div>
-            <div class="h-2 w-24 mx-auto bg-gray-100 rounded"></div>
-            <div class="pt-3 space-y-2">
-              <div class="h-6 bg-gray-100 rounded"></div>
-              <div class="h-6 bg-gray-100 rounded"></div>
-              <div class="h-6 bg-gray-100 rounded"></div>
+        <div class="flex w-full items-center justify-between">
+          <div class="flex items-center">
+            <div class="text-sm">
+              <p class="font-medium text-gray-900">Simple</p>
+              <div class="text-gray-500">
+                <p class="sm:inline">Basic link list template</p>
+              </div>
             </div>
           </div>
+          <Icon
+            v-if="modelValue === 'simple'"
+            name="ph:check-circle-fill"
+            class="h-5 w-5 text-indigo-600"
+          />
         </div>
-        <div class="absolute bottom-2 inset-x-0 text-center text-sm font-medium text-gray-900">
-          Simple Links
-        </div>
-      </button>
+      </div>
 
       <!-- Store Template -->
-      <button
-        @click="selectTemplate('store')"
-        class="relative aspect-[4/5] rounded-lg border-2 overflow-hidden hover:border-indigo-500 transition-colors"
-        :class="modelValue === 'store' ? 'border-indigo-500 ring-2 ring-indigo-500 ring-offset-2' : 'border-gray-200'"
+      <div
+        class="relative flex cursor-pointer rounded-lg border bg-white p-4 shadow-sm focus:outline-none"
+        :class="modelValue === 'store' ? 'border-indigo-500 ring-2 ring-indigo-500' : 'border-gray-300'"
+        @click="$emit('update:modelValue', 'store')"
       >
-        <div class="absolute inset-0 bg-white">
-          <div class="p-3 space-y-2">
-            <div class="w-12 h-12 mx-auto rounded-full bg-gray-100"></div>
-            <div class="h-3 w-20 mx-auto bg-gray-100 rounded"></div>
-            <div class="h-2 w-24 mx-auto bg-gray-100 rounded"></div>
-            <div class="pt-3 grid grid-cols-2 gap-1">
-              <div>
-                <div class="aspect-square bg-gray-100 rounded mb-1"></div>
-                <div class="h-2 bg-gray-100 rounded"></div>
-              </div>
-              <div>
-                <div class="aspect-square bg-gray-100 rounded mb-1"></div>
-                <div class="h-2 bg-gray-100 rounded"></div>
-              </div>
-              <div>
-                <div class="aspect-square bg-gray-100 rounded mb-1"></div>
-                <div class="h-2 bg-gray-100 rounded"></div>
-              </div>
-              <div>
-                <div class="aspect-square bg-gray-100 rounded mb-1"></div>
-                <div class="h-2 bg-gray-100 rounded"></div>
+        <div class="flex w-full items-center justify-between">
+          <div class="flex items-center">
+            <div class="text-sm">
+              <p class="font-medium text-gray-900">Store</p>
+              <div class="text-gray-500">
+                <p class="sm:inline">Product showcase template</p>
               </div>
             </div>
           </div>
+          <Icon
+            v-if="modelValue === 'store'"
+            name="ph:check-circle-fill"
+            class="h-5 w-5 text-indigo-600"
+          />
         </div>
-        <div class="absolute bottom-2 inset-x-0 text-center text-sm font-medium text-gray-900">
-          Store Products
+      </div>
+
+      <!-- Blog Template -->
+      <div
+        class="relative flex cursor-pointer rounded-lg border bg-white p-4 shadow-sm focus:outline-none"
+        :class="modelValue === 'blog' ? 'border-indigo-500 ring-2 ring-indigo-500' : 'border-gray-300'"
+        @click="$emit('update:modelValue', 'blog')"
+      >
+        <div class="flex w-full items-center justify-between">
+          <div class="flex items-center">
+            <div class="text-sm">
+              <p class="font-medium text-gray-900">Blog</p>
+              <div class="text-gray-500">
+                <p class="sm:inline">Blog posts template</p>
+              </div>
+            </div>
+          </div>
+          <Icon
+            v-if="modelValue === 'blog'"
+            name="ph:check-circle-fill"
+            class="h-5 w-5 text-indigo-600"
+          />
         </div>
-      </button>
+      </div>
     </div>
-  </div>
+  </base-form-section>
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{
-  modelValue: 'simple' | 'store'
-}>()
+import { Icon } from '@iconify/vue'
 
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: 'simple' | 'store'): void
-}>()
-
-const selectTemplate = (template: 'simple' | 'store') => {
-  console.log('[AppTemplateSelector] Selecting template:', template)
-  console.log('[AppTemplateSelector] Template type:', typeof template)
-  console.log('[AppTemplateSelector] Raw template value:', JSON.stringify(template))
-  emit('update:modelValue', template)
+interface Props {
+  modelValue: 'simple' | 'store' | 'blog'
 }
+
+defineProps<Props>()
+defineEmits(['update:modelValue'])
 </script> 

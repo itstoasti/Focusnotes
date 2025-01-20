@@ -35,6 +35,7 @@ import '@iconify/vue'
 import { Icon } from '@iconify/vue'
 import Simple from '~/components/Templates/Simple.vue'
 import Store from '~/components/Templates/Store.vue'
+import Blog from '~/components/Templates/Blog.vue'
 
 // Register Icon component globally
 const nuxtApp = useNuxtApp()
@@ -51,6 +52,8 @@ const selectedTemplate = computed(() => {
   switch (decodedData.value?.template) {
     case 'store':
       return Store
+    case 'blog':
+      return Blog
     case 'simple':
     default:
       return Simple

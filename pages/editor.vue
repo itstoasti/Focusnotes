@@ -50,7 +50,7 @@
           />
           <app-form-hr />
           <component
-            :is="data.template === 'store' ? AppFormStoreProducts : AppFormLinks"
+            :is="data.template === 'store' ? AppFormStoreProducts : data.template === 'blog' ? AppFormBlog : AppFormLinks"
             v-model="data.ls"
             :template="data.template"
           />
@@ -63,10 +63,42 @@
     <!-- Right section (preview) -->
     <div class="bg-slate-100 relative">
       <div class="sticky top-0 h-screen overflow-hidden">
-        <div class="preview-container h-full">
-          <ThemeProvider>
-            <app-form-preview :data="data" />
-          </ThemeProvider>
+        <div 
+          class="h-screen grid place-items-center"
+          :style="{ backgroundColor: theme.current.colors.background }"
+        >
+          <div
+            class="h-[729px] w-[340px] rounded-[3rem] overflow-hidden"
+            :class="[
+              theme.current.colors.background === '#1F2937' ? 'ring-8 ring-white/20' : 'ring-8 ring-slate-800'
+            ]"
+          >
+            <div 
+              class="h-full scrollbar-hide"
+              :class="{ 
+                'overflow-y-auto': data.template === 'simple',
+                'overflow-y-scroll': data.template === 'store' || data.template === 'blog'
+              }"
+            >
+              <ThemeProvider 
+                class="h-full"
+                :style="{
+                  '--color-primary': theme.current.colors.primary,
+                  '--color-background': theme.current.colors.background,
+                  '--color-text': theme.current.colors.text,
+                  '--color-accent': theme.current.colors.accent,
+                  '--font-heading': theme.current.font.heading,
+                  '--font-body': theme.current.font.body,
+                  backgroundColor: theme.current.colors.background
+                }"
+              >
+                <component 
+                  :is="data.template === 'store' ? TemplateStore : data.template === 'blog' ? TemplateBlog : TemplateSimple" 
+                  :data="data" 
+                />
+              </ThemeProvider>
+            </div>
+          </div>
         </div>
         <!-- Branding -->
         <a
@@ -86,6 +118,10 @@ import { Icon } from '@iconify/vue'
 import { encodeData } from "../utils/transformer";
 import AppFormStoreProducts from '~/components/AppFormStoreProducts.vue'
 import AppFormLinks from '~/components/AppFormLinks.vue'
+import AppFormBlog from '~/components/AppForm/Blog.vue'
+import TemplateSimple from '~/components/Templates/Simple.vue'
+import TemplateStore from '~/components/Templates/Store.vue'
+import TemplateBlog from '~/components/Templates/Blog.vue'
 
 // Auth
 const client = useSupabaseClient()
@@ -128,7 +164,7 @@ interface FormData {
   w: string
   y: string
   ls: Link[]
-  template: 'simple' | 'store'
+  template: 'simple' | 'store' | 'blog'
 }
 
 const data = ref<FormData>({
@@ -148,6 +184,40 @@ const data = ref<FormData>({
   template: "simple",
 });
 
+// Add after the data ref declaration
+const route = useRoute()
+
+// Load existing link data if editing
+onMounted(async () => {
+  const editId = route.query.edit
+  if (editId) {
+    const { data: linkData, error } = await client
+      .from('links')
+      .select('*')
+      .eq('id', editId)
+      .single()
+    
+    if (error) {
+      console.error('Error loading link:', error)
+      alert('Error loading link')
+      return
+    }
+    
+    if (linkData) {
+      // Populate form with existing data
+      data.value = {
+        ...linkData.data,
+        template: linkData.data.template
+      }
+      
+      // Set theme
+      if (linkData.data.theme) {
+        theme.current = linkData.data.theme
+      }
+    }
+  }
+})
+
 // Watch for template changes and update demo data if it's being used
 watch(() => data.value.template, async (newTemplate, oldTemplate) => {
   console.log('[Editor] Template changed from', oldTemplate, 'to:', newTemplate)
@@ -166,116 +236,218 @@ watch(() => data.value.template, async (newTemplate, oldTemplate) => {
 }, { immediate: true });
 
 const prefillDemoData = () => {
-  const template = data.value.template;
-  
-  if (template === 'store') {
+  if (data.value.template === "store") {
     data.value = {
-      n: "John Snow",
+      n: "John's Store",
       d: "Welcome to my store! Check out my latest products.",
-      i: "https://i.insider.com/56743fad72f2c12a008b6cc0",
-      f: "https://www.facebook.com/john_snow",
-      t: "https://twitter.com/john_snow",
-      ig: "https://www.instagram.com/john_snow",
-      e: "mail@john_snow.cc",
-      gh: "https://github.com/john_snow",
-      tg: "https://t.me/john_snow",
-      w: "+918888888888",
-      y: "https://youtube.com/@john_snow",
-      l: "https://linkedin.com/john_snow",
+      i: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e",
+      f: "https://www.facebook.com/john_store",
+      t: "https://twitter.com/john_store",
+      ig: "https://www.instagram.com/john_store",
+      e: "store@john.cc",
+      gh: "",
+      tg: "",
+      w: "",
+      y: "",
+      l: "",
       template: "store",
       ls: [
         {
-          l: "Winter Coat",
-          u: "https://example.com/winter-coat",
-          img: "https://images.unsplash.com/photo-1539533113208-f6df8cc8b543?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80",
-          price: "99.99",
-          description: "Stay warm with our premium winter coat."
-        },
-        {
-          l: "Snow Boots",
-          u: "https://example.com/snow-boots",
-          img: "https://images.unsplash.com/photo-1542280756-74b2f55e73ab?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80",
-          price: "79.99",
-          description: "Perfect for walking in the snow."
-        },
-        {
           l: "Leather Gloves",
-          u: "https://example.com/leather-gloves",
-          img: "https://images.unsplash.com/photo-1642952180306-588f9eddce8e?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+          u: "https://example.com/gloves",
+          img: "https://images.unsplash.com/photo-1490118121063-d12f8c4464ce",
           price: "49.99",
-          description: "Premium leather gloves for cold weather."
+          description: "Premium leather gloves handcrafted from the finest Italian leather. Perfect for both style and warmth."
+        },
+        {
+          l: "Vintage Watch",
+          u: "https://example.com/watch",
+          img: "https://images.unsplash.com/photo-1524592094714-0f0654e20314",
+          price: "199.99",
+          description: "Classic automatic timepiece with genuine leather strap. Features a sophisticated design that never goes out of style."
         },
         {
           l: "Wool Scarf",
-          u: "https://example.com/wool-scarf",
-          img: "https://images.unsplash.com/photo-1607242792481-37f27e1d74e1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80",
+          u: "https://example.com/scarf",
+          img: "https://images.unsplash.com/photo-1584613862210-a67f5b52e4d6",
           price: "29.99",
-          description: "Soft and warm wool scarf."
+          description: "Soft, warm wool scarf made from 100% merino wool. Perfect for cold winter days."
+        },
+        {
+          l: "Leather Wallet",
+          u: "https://example.com/wallet",
+          img: "https://images.unsplash.com/photo-1627123424574-724758594e93",
+          price: "79.99",
+          description: "Handcrafted leather wallet with multiple card slots and RFID protection. Made from genuine full-grain leather."
         }
-      ],
-    };
+      ]
+    }
+  } else if (data.value.template === "blog") {
+    data.value = {
+      n: "John's Blog",
+      d: "Thoughts, stories and ideas.",
+      i: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e",
+      f: "https://www.facebook.com/john_blog",
+      t: "https://twitter.com/john_blog",
+      ig: "https://www.instagram.com/john_blog",
+      e: "blog@john.cc",
+      gh: "https://github.com/john",
+      tg: "",
+      w: "",
+      y: "",
+      l: "",
+      template: "blog",
+      ls: [
+        {
+          l: "Getting Started with Web Development",
+          img: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6",
+          content: "Web development can seem daunting at first, but with the right approach, anyone can learn it. In this post, I'll share my journey and some tips for beginners.\n\nFirst, start with the basics: HTML, CSS, and JavaScript. These three technologies form the foundation of web development. HTML structures your content, CSS styles it, and JavaScript adds interactivity.\n\nHere's a simple roadmap to follow:\n1. Learn HTML basics\n2. Style with CSS\n3. Add interactivity with JavaScript\n4. Choose a framework\n5. Practice, practice, practice!",
+          description: "A beginner's guide to starting your web development journey",
+          published: true,
+          updatedAt: new Date()
+        },
+        {
+          l: "The Future of AI in Technology",
+          img: "https://images.unsplash.com/photo-1677442136019-21780ecad995",
+          content: "Artificial Intelligence is rapidly changing the technology landscape. From chatbots to autonomous vehicles, AI is becoming increasingly integrated into our daily lives.\n\nIn this post, we'll explore:\n- Current AI trends\n- Future predictions\n- Impact on jobs\n- Ethical considerations\n\nAs we move forward, it's crucial to understand both the potential and limitations of AI technology.",
+          description: "Exploring the impact of AI on the future of technology",
+          published: true,
+          updatedAt: new Date()
+        },
+        {
+          l: "Building Sustainable Software",
+          img: "https://images.unsplash.com/photo-1518432031352-d6fc5c10da5a",
+          content: "Sustainable software development is about creating applications that are maintainable, scalable, and environmentally conscious.\n\nKey principles include:\n- Writing clean, maintainable code\n- Optimizing for performance\n- Reducing energy consumption\n- Using efficient algorithms\n\nBy following these principles, we can build better software that lasts longer and has a smaller environmental impact.",
+          description: "Best practices for creating sustainable and maintainable software",
+          published: true,
+          updatedAt: new Date()
+        },
+        {
+          l: "Modern UI Design Trends",
+          img: "https://images.unsplash.com/photo-1555066931-4365d14bab8c",
+          content: "The world of UI design is constantly evolving, with new trends emerging every year. In this post, we'll explore the latest design patterns and techniques that are shaping modern web interfaces.\n\nKey trends include:\n- Minimalist interfaces\n- Dark mode design\n- Micro-interactions\n- Glassmorphism\n- Responsive animations\n\nUnderstanding these trends helps create more engaging and user-friendly applications that meet modern design standards.",
+          description: "Exploring current trends in user interface design and modern web aesthetics",
+          published: true,
+          updatedAt: new Date()
+        }
+      ]
+    }
   } else {
     data.value = {
       n: "John Snow",
-      d: "I'm John Snow, the king in the north. I know Nothing.",
-      i: "https://i.insider.com/56743fad72f2c12a008b6cc0",
-      f: "https://www.facebook.com/john_snow",
-      t: "https://twitter.com/john_snow",
-      ig: "https://www.instagram.com/john_snow",
-      e: "mail@john_snow.cc",
-      gh: "https://github.com/john_snow",
-      tg: "https://t.me/john_snow",
-      w: "+918888888888",
-      y: "https://youtube.com/@john_snow",
-      l: "https://linkedin.com/john_snow",
+      d: "Developer, designer & content creator",
+      i: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e",
+      f: "https://www.facebook.com/john",
+      t: "https://twitter.com/john",
+      ig: "https://www.instagram.com/john",
+      e: "hello@john.cc",
+      gh: "https://github.com/john",
+      tg: "",
+      w: "",
+      y: "",
+      l: "",
       template: "simple",
       ls: [
         {
-          l: "My Website",
-          i: "ph:globe-duotone",
-          u: "https://example.com",
+          l: "Personal Website",
+          u: "https://john.cc"
         },
         {
-          l: "Amazon wishlist",
-          i: "ant-design:amazon-outlined",
-          u: "https://amazon.in",
+          l: "Latest Project",
+          u: "https://github.com/john/project"
         },
         {
-          l: "React JS course",
-          i: "grommet-icons:reactjs",
-          u: "https://reactjs.org/",
-        },
-        {
-          l: "Donate for our cause",
-          i: "iconoir:donate",
-          u: "https://who.int",
-        },
-        {
-          l: "Download my resume",
-          i: "ph:file-pdf",
-          u: "https://google.com",
-        },
-      ],
-    };
+          l: "Get in touch",
+          u: "mailto:hello@john.cc"
+        }
+      ]
+    }
   }
 };
 
 const theme = useThemeStore()
 const shortLinks = useShortLinkStore()
 
+// Update publish function to handle updates
 const publish = async () => {
+  const editId = route.query.edit
+  
+  // Make sure we include the complete theme data
   const publishData = {
     ...data.value,
-    theme: theme.current
+    theme: {
+      ...theme.current,
+      colors: { ...theme.current.colors },
+      font: { ...theme.current.font }
+    }
   };
+  
+  if (editId) {
+    // Update existing link
+    const { error: updateError } = await client
+      .from('links')
+      .update({ data: publishData })
+      .match({ id: editId })
+    
+    if (updateError) {
+      console.error('Error updating link:', updateError)
+      alert('Error updating link')
+      return
+    }
+    
+    alert('Link updated successfully!')
+    navigateTo('/links')
+    return
+  }
+  
+  // Create new link
   const longUrl = `${window.location.origin}/1?data=${encodeData(publishData)}`;
-  
-  // Create short link
+  console.log('Creating short link for URL:', longUrl);
   const shortId = await shortLinks.createShortLink(longUrl);
-  const shortUrl = shortId ? `${window.location.origin}/s/${shortId}` : longUrl;
-  
+
+  if (!shortId) {
+    console.error('Failed to create short link')
+    alert('Error creating link')
+    return
+  }
+
+  console.log('Created short link with ID:', shortId);
+
+  // Store the link data in the links table
+  const { data: insertData, error: insertError } = await client
+    .from('links')
+    .insert({
+      short_id: shortId,
+      data: publishData,
+      clicks: 0,
+      user_id: user.value?.id
+    })
+    .select()
+
+  if (insertError) {
+    console.error('Error storing link:', insertError.message)
+    alert('Error storing link: ' + insertError.message)
+    return
+  }
+
+  console.log('Successfully stored link:', insertData)
+
+  const shortUrl = `${window.location.origin}/s/${shortId}`;
   navigator.clipboard.writeText(shortUrl).then(() => {
     alert("Link copied to clipboard");
   });
+  
+  // Navigate to the links page
+  navigateTo('/links')
 };
-</script> 
+</script>
+
+<style>
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
+</style> 

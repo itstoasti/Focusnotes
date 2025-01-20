@@ -23,7 +23,7 @@
             <div class="grid grid-cols-2 gap-4">
               <div class="bg-gray-50 p-4 rounded-lg">
                 <div class="text-sm text-gray-500">Total Links</div>
-                <div class="text-2xl font-semibold text-gray-900">{{ data.ls.length }}</div>
+                <div class="text-2xl font-semibold text-gray-900">{{ totalLinks }}</div>
               </div>
               <div class="bg-gray-50 p-4 rounded-lg">
                 <div class="text-sm text-gray-500">Active Template</div>
@@ -36,7 +36,7 @@
               <h3 class="text-sm font-medium text-gray-900 mb-3">Top Clicked Links</h3>
               <div class="space-y-3">
                 <div v-if="topLinks.length === 0" class="text-sm text-gray-500 text-center py-4">
-                  No published links yet
+                  No clicked links yet
                 </div>
                 <div
                   v-for="link in topLinks"
@@ -45,10 +45,10 @@
                 >
                   <div class="min-w-0">
                     <div class="text-sm font-medium text-gray-900 truncate">
-                      {{ link.nickname || 'Untitled Link' }}
+                      {{ link.data.n || 'Untitled Link' }}
                     </div>
                     <div class="text-xs text-gray-500 truncate">
-                      {{ shortUrl(link.id) }}
+                      {{ `${origin}/s/${link.short_id}` }}
                     </div>
                   </div>
                   <div class="text-sm font-medium text-gray-900">
@@ -149,20 +149,67 @@ const data = ref<FormData>({
 
 interface PublishedLink {
   id: string
-  nickname?: string
+  short_id: string
   clicks: number
+  data: {
+    n: string
+    template: string
+    [key: string]: any
+  }
 }
 
+const totalLinks = ref(0)
 const topLinks = ref<PublishedLink[]>([])
 const origin = ref('')
 
-// Get origin on client-side only
+// Fetch all links for stats
+const fetchLinks = async () => {
+  const { data: linkData, error } = await client
+    .from('links')
+    .select('*')
+    .eq('user_id', user.value?.id)
+  
+  if (error) {
+    console.error('Error fetching links:', error)
+    return
+  }
+  
+  totalLinks.value = linkData?.length || 0
+}
+
+// Fetch top clicked links
+const fetchTopLinks = async () => {
+  console.log('Fetching top links for user:', user.value?.id)
+  
+  const { data: linkData, error } = await client
+    .from('links')
+    .select('id, short_id, clicks, data')
+    .eq('user_id', user.value?.id)
+    .gt('clicks', 0)  // Only get links with clicks > 0
+    .order('clicks', { ascending: false })
+    .limit(5)
+  
+  if (error) {
+    console.error('Error fetching top links:', error)
+    return
+  }
+  
+  console.log('Fetched links:', linkData)
+  topLinks.value = linkData || []
+  console.log('Top links:', topLinks.value)
+}
+
+// Update onMounted
 onMounted(() => {
   origin.value = window.location.origin
+  fetchLinks()
   fetchTopLinks()
   
   // Refresh every 30 seconds
-  const interval = setInterval(fetchTopLinks, 30000)
+  const interval = setInterval(() => {
+    fetchLinks()
+    fetchTopLinks()
+  }, 30000)
   
   // Clean up interval on component unmount
   onUnmounted(() => clearInterval(interval))
@@ -171,23 +218,5 @@ onMounted(() => {
 // Generate short URL
 const shortUrl = (id: string) => {
   return `${origin.value}/s/${id}`
-}
-
-// Fetch top clicked links
-const fetchTopLinks = async () => {
-  try {
-    const { data, error } = await client
-      .from('short_links')
-      .select('id, nickname, clicks')
-      .order('clicks', { ascending: false })
-      .limit(5)
-
-    if (error) throw error
-    
-    // Filter out links with 0 clicks
-    topLinks.value = data.filter(link => link.clicks > 0)
-  } catch (error) {
-    console.error('Error fetching top links:', error)
-  }
 }
 </script> 

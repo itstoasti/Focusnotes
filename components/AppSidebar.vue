@@ -62,6 +62,17 @@
               <Icon icon="ph:gear-six-bold" class="h-5 w-5" />
               <span>Settings</span>
             </NuxtLink>
+
+            <!-- Admin Link (only shown to admins) -->
+            <NuxtLink
+              v-if="isAdmin"
+              to="/admin"
+              class="flex items-center space-x-2 p-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100"
+              :class="{ 'bg-gray-100': route.path === '/admin' }"
+            >
+              <Icon icon="ph:shield-duotone" class="h-5 w-5" />
+              <span>Admin</span>
+            </NuxtLink>
           </div>
         </div>
 
@@ -101,13 +112,35 @@
 
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
+import { ref, onMounted } from 'vue'
+const route = useRoute()
+const client = useSupabaseClient()
 
 defineEmits(['prefill', 'publish'])
 const isOpen = ref(false)
 
 // Auth
-const client = useSupabaseClient()
 const user = useSupabaseUser()
+
+const isAdmin = ref(false)
+
+onMounted(async () => {
+  if (!user.value) return;
+  
+  console.log('Checking admin status for user:', user.value.email)
+  try {
+    const { data, error } = await client.rpc('is_admin')
+    console.log('Admin check response:', { data, error })
+    if (error) {
+      console.error('Error checking admin status:', error)
+      return
+    }
+    isAdmin.value = !!data
+    console.log('Is admin?', isAdmin.value)
+  } catch (e) {
+    console.error('Error in admin check:', e)
+  }
+})
 
 const handleLogout = async () => {
   const { error } = await client.auth.signOut()
