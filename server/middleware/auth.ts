@@ -4,13 +4,12 @@ export default defineEventHandler(async (event) => {
   const client = await serverSupabaseClient(event)
   const { data: { session }, error } = await client.auth.getSession()
 
-  // Handle OAuth callback
-  if (event.path === '/auth/callback') {
+  if (session?.user?.id) {
     try {
-      // Get the user's Twitter data from the provider token
+      // Get the user's data
       const { data: { user } } = await client.auth.getUser()
       
-      if (user?.app_metadata?.provider === 'twitter' && session?.user?.id) {
+      if (user?.app_metadata?.provider === 'twitter') {
         // Store Twitter account data in profiles
         await client
           .from('profiles')

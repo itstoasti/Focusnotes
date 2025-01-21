@@ -314,7 +314,7 @@ const connectX = async () => {
     const { data, error } = await client.auth.signInWithOAuth({
       provider: 'twitter',
       options: {
-        redirectTo: 'https://grclwgupyulhuqwdpvxn.functions.supabase.co/twitter-auth',
+        redirectTo: 'https://socialgathering.io/settings',
         scopes: 'tweet.read tweet.write users.read'
       }
     })

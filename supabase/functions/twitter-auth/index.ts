@@ -15,18 +15,13 @@ const corsHeaders = {
 
 console.log("Hello from Functions!")
 
-serve(async (req) => {
+serve(async (req: Request) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
-
     // Get the code and state from the request URL
     const url = new URL(req.url)
     const code = url.searchParams.get('code')
@@ -35,6 +30,25 @@ serve(async (req) => {
     if (!code) {
       throw new Error('No code provided')
     }
+
+    // Get the authorization header
+    const authHeader = req.headers.get('Authorization')?.split(' ')[1]
+    if (!authHeader) {
+      throw new Error('No authorization header')
+    }
+
+    // Create Supabase client
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') || '',
+      Deno.env.get('SUPABASE_ANON_KEY') || '',
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+          detectSessionInUrl: false
+        }
+      }
+    )
 
     // Exchange the code for OAuth tokens
     const { data: { user }, error: authError } = await supabaseClient.auth.exchangeCodeForSession(code)
@@ -74,9 +88,9 @@ serve(async (req) => {
       }
     })
 
-  } catch (error) {
-    console.error('Error:', error)
-    return new Response(JSON.stringify({ error: error.message }), {
+  } catch (err: any) {
+    console.error('Error:', err)
+    return new Response(JSON.stringify({ error: err.message }), {
       status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
