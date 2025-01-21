@@ -23,6 +23,8 @@ export default defineEventHandler(async (event) => {
       .eq('id', user.id)
       .single();
 
+    console.log('Found profile:', profiles);
+
     if (!profiles?.stripe_customer_id) {
       throw createError({
         statusCode: 400,
@@ -34,6 +36,8 @@ export default defineEventHandler(async (event) => {
       customer: profiles.stripe_customer_id,
     });
 
+    console.log('Found subscriptions:', subscriptions);
+
     if (subscriptions.length === 0) {
       throw createError({
         statusCode: 400,
@@ -42,11 +46,23 @@ export default defineEventHandler(async (event) => {
     }
 
     // Cancel the subscription at period end
-    await stripe.subscriptions.update(subscriptions[0].id, {
+    const updatedSubscription = await stripe.subscriptions.update(subscriptions[0].id, {
       cancel_at_period_end: true,
     });
 
-    return { message: 'Subscription will be canceled at the end of the billing period' };
+    // Update local subscription status and end date
+    await client
+      .from('subscriptions')
+      .update({ 
+        status: 'canceling',
+        current_period_end: new Date(updatedSubscription.current_period_end * 1000).toISOString()
+      })
+      .eq('stripe_subscription_id', subscriptions[0].id);
+
+    return { 
+      message: 'Subscription will be canceled at the end of the billing period',
+      current_period_end: updatedSubscription.current_period_end
+    };
   } catch (error: any) {
     throw createError({
       statusCode: 400,

@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
     const { plan } = body;
 
     const session = await stripe.checkout.sessions.create({
-      customer_email: user.email,
+      payment_method_types: ['card'],
       line_items: [
         {
           price: process.env[`STRIPE_${plan.toUpperCase()}_PRICE_ID`],
@@ -34,6 +34,13 @@ export default defineEventHandler(async (event) => {
       metadata: {
         user_id: user.id,
       },
+      customer_email: user.email,
+    });
+
+    console.log('Created checkout session:', {
+      id: session.id,
+      customer: session.customer,
+      metadata: session.metadata,
     });
 
     return { url: session.url };
