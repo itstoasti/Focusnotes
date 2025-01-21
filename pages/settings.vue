@@ -311,15 +311,10 @@ const logout = async () => {
 // Function to connect X account
 const connectX = async () => {
   try {
-    // Get the base URL for the environment
-    const baseUrl = window.location.origin === 'http://localhost:3000' 
-      ? 'http://localhost:3000'
-      : 'https://socialgathering.io'
-
     const { data, error } = await client.auth.signInWithOAuth({
       provider: 'twitter',
       options: {
-        redirectTo: `${baseUrl}/auth/callback`,
+        redirectTo: 'https://socialgathering.io/auth/callback',
         scopes: 'tweet.read tweet.write users.read'
       }
     })
