@@ -28,6 +28,37 @@
 
           <!-- Preferences -->
           <div class="pt-6 border-t">
+            <h2 class="text-lg font-medium text-gray-900 mb-4">Connected Accounts</h2>
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <Icon icon="mdi:twitter" class="h-6 w-6 text-blue-400" />
+                  <div>
+                    <h3 class="text-sm font-medium text-gray-900">X (Twitter)</h3>
+                    <p class="text-sm text-gray-500" v-if="!xAccount">Connect your X account to enable posting</p>
+                    <p class="text-sm text-gray-500" v-else>Connected as @{{ xAccount.username }}</p>
+                  </div>
+                </div>
+                <button
+                  v-if="!xAccount"
+                  @click="connectX"
+                  class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Connect
+                </button>
+                <button
+                  v-else
+                  @click="disconnectX"
+                  class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Disconnect
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preferences -->
+          <div class="pt-6 border-t">
             <h2 class="text-lg font-medium text-gray-900 mb-4">Preferences</h2>
             <div class="space-y-4">
               <div class="flex items-center justify-between">
@@ -64,6 +95,9 @@
                     </h3>
                     <div class="mt-2 text-sm text-green-700">
                       <p>You have access to all premium features.</p>
+                      <p v-if="subscription.details?.current_period_end" class="mt-1">
+                        Next billing date: {{ new Date(subscription.details.current_period_end).toLocaleDateString() }}
+                      </p>
                     </div>
                     <div class="mt-4">
                       <button
@@ -73,6 +107,24 @@
                       >
                         Cancel Subscription
                       </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div v-else-if="subscription?.status === 'canceling'" class="bg-yellow-50 p-4 rounded-lg">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <Icon icon="ph:info-duotone" class="h-5 w-5 text-yellow-400" />
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium text-yellow-800">
+                      Subscription Canceling
+                    </h3>
+                    <div class="mt-2 text-sm text-yellow-700">
+                      <p>Your subscription will remain active until the end of the billing period.</p>
+                      <p v-if="subscription.details?.current_period_end" class="mt-1 font-medium">
+                        Access ends: {{ new Date(subscription.details.current_period_end).toLocaleDateString() }}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -143,20 +195,59 @@ definePageMeta({
 
 // Default template preference
 const defaultTemplate = ref<'simple' | 'store'>('simple')
-const subscription = ref(null)
+const subscription = ref<{ status: string; details: any } | null>(null)
 const isLoading = ref(true)
+const xAccount = ref<{ username: string } | null>(null)
 
 // Fetch subscription status
 const fetchSubscription = async () => {
+  console.log('Fetching subscription for user:', user.value?.id)
   try {
-    const { data, error } = await client
-      .from('subscriptions')
-      .select('*')
-      .eq('user_id', user.value?.id)
+    // Check profiles table for subscription status
+    const { data: profileData, error: profileError } = await client
+      .from('profiles')
+      .select('subscription_status, stripe_customer_id')
+      .eq('id', user.value?.id)
       .single()
 
-    if (error) throw error
-    subscription.value = data
+    console.log('Profile data:', profileData)
+    console.log('Profile error:', profileError)
+
+    if (profileError) {
+      console.error('Profile error:', profileError)
+      return
+    }
+
+    // Check subscriptions table for detailed subscription info
+    const { data: subscriptionData, error: subscriptionError } = await client
+      .from('subscriptions')
+      .select('*, stripe_subscription_id, current_period_end')
+      .eq('user_id', user.value?.id)
+      .in('status', ['active', 'canceling'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    console.log('Raw subscription data:', subscriptionData)
+    console.log('Subscription error:', subscriptionError)
+
+    // Set subscription status and details
+    let status = profileData?.subscription_status || 'inactive'
+    let details = null
+
+    if (subscriptionData) {
+      details = {
+        ...subscriptionData,
+        current_period_end: subscriptionData.current_period_end
+      }
+      // If subscription is marked as canceling, override the status
+      if (subscriptionData.status === 'canceling') {
+        status = 'canceling'
+      }
+    }
+
+    subscription.value = { status, details }
+    console.log('Final subscription value:', subscription.value)
   } catch (err) {
     console.error('Error fetching subscription:', err)
   } finally {
@@ -186,18 +277,26 @@ const handleSubscribe = async (plan: string) => {
 // Cancel subscription
 const handleCancel = async () => {
   try {
+    console.log('Starting subscription cancellation...');
+    const token = await client.auth.getSession().then(res => res.data.session?.access_token);
+    console.log('Got auth token:', !!token);
+    
     const response = await fetch('/api/cancel-subscription', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${await client.auth.getSession().then(res => res.data.session?.access_token)}`,
+        Authorization: `Bearer ${token}`,
       },
-    })
+    });
 
-    if (!response.ok) throw new Error('Failed to cancel subscription')
-    await fetchSubscription()
+    console.log('Cancel subscription response status:', response.status);
+    const responseData = await response.json();
+    console.log('Cancel subscription response:', responseData);
+
+    if (!response.ok) throw new Error(responseData.message || 'Failed to cancel subscription');
+    await fetchSubscription();
   } catch (err) {
-    console.error('Error canceling subscription:', err)
+    console.error('Error canceling subscription:', err);
   }
 }
 
@@ -209,7 +308,68 @@ const logout = async () => {
   }
 }
 
+// Function to connect X account
+const connectX = async () => {
+  try {
+    // Get the base URL for the environment
+    const baseUrl = window.location.origin === 'http://localhost:3000' 
+      ? 'http://localhost:3000'
+      : 'https://socialgathering.io'
+
+    const { data, error } = await client.auth.signInWithOAuth({
+      provider: 'twitter',
+      options: {
+        redirectTo: `${baseUrl}/auth/callback`,
+        scopes: 'tweet.read tweet.write users.read'
+      }
+    })
+    if (error) {
+      console.error('OAuth error:', error)
+      throw error
+    }
+    if (data?.url) {
+      window.location.href = data.url
+    }
+  } catch (err) {
+    console.error('Error connecting X account:', err)
+  }
+}
+
+// Function to disconnect X account
+const disconnectX = async () => {
+  try {
+    const { error } = await client
+      .from('profiles')
+      .update({ x_account_data: null })
+      .eq('id', user.value?.id)
+
+    if (error) throw error
+    xAccount.value = null
+  } catch (err) {
+    console.error('Error disconnecting X account:', err)
+  }
+}
+
+// Function to fetch X account details
+const fetchXAccount = async () => {
+  try {
+    const { data, error } = await client
+      .from('profiles')
+      .select('x_account_data')
+      .eq('id', user.value?.id)
+      .single()
+
+    if (error) throw error
+    if (data?.x_account_data) {
+      xAccount.value = data.x_account_data
+    }
+  } catch (err) {
+    console.error('Error fetching X account:', err)
+  }
+}
+
 onMounted(() => {
   fetchSubscription()
+  fetchXAccount()
 })
 </script> 
