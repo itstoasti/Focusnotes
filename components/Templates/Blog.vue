@@ -137,12 +137,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, onErrorCaptured, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 
 const props = defineProps<{
   data: any
-  theme: any
+  theme: {
+    colors: {
+      primary: string
+      background: string
+      text: string
+      accent: string
+    }
+    font: {
+      heading: string
+      body: string
+    }
+  }
 }>()
 
 // View mode state
@@ -151,7 +162,13 @@ const selectedPost = ref<any>(null)
 
 // Computed properties
 const publishedPosts = computed(() => {
-  return props.data.ls?.filter((post: any) => post.published) || []
+  if (!props.data?.ls || !Array.isArray(props.data.ls)) {
+    console.log('No posts data available:', props.data?.ls)
+    return []
+  }
+  const posts = props.data.ls.filter((post: any) => post.published)
+  console.log('Published posts:', posts)
+  return posts
 })
 
 // Header gradient style
@@ -159,14 +176,31 @@ const headerStyle = computed(() => ({
   background: `linear-gradient(to bottom, ${props.theme.colors.primary}22, ${props.theme.colors.background})`
 }))
 
-// Format date
-const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
+// Format date with error handling
+const formatDate = (date: string | Date) => {
+  try {
+    if (!date) return 'Unknown date'
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  } catch (err) {
+    console.error('Error formatting date:', err)
+    return 'Unknown date'
+  }
 }
+
+// Add error boundary
+onErrorCaptured((err, instance, info) => {
+  console.error('Error in Blog template:', err, info)
+  return false
+})
+
+// Add mounted hook for debugging
+onMounted(() => {
+  console.log('Blog template mounted with data:', props.data)
+})
 </script>
 
 <style>

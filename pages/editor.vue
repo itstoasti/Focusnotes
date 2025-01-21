@@ -95,6 +95,7 @@
                 <component 
                   :is="data.template === 'store' ? TemplateStore : data.template === 'blog' ? TemplateBlog : TemplateSimple" 
                   :data="data" 
+                  :theme="theme.current"
                 />
               </ThemeProvider>
             </div>
@@ -284,6 +285,7 @@ const prefillDemoData = () => {
     }
   } else if (data.value.template === "blog") {
     data.value = {
+      ...data.value,  // Preserve template selection
       n: "John's Blog",
       d: "Thoughts, stories and ideas.",
       i: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e",
@@ -299,36 +301,22 @@ const prefillDemoData = () => {
       template: "blog",
       ls: [
         {
+          id: '1',
           l: "Getting Started with Web Development",
           img: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6",
-          content: "Web development can seem daunting at first, but with the right approach, anyone can learn it. In this post, I'll share my journey and some tips for beginners.\n\nFirst, start with the basics: HTML, CSS, and JavaScript. These three technologies form the foundation of web development. HTML structures your content, CSS styles it, and JavaScript adds interactivity.\n\nHere's a simple roadmap to follow:\n1. Learn HTML basics\n2. Style with CSS\n3. Add interactivity with JavaScript\n4. Choose a framework\n5. Practice, practice, practice!",
-          description: "A beginner's guide to starting your web development journey",
+          description: "A beginner's guide to web development, covering HTML, CSS, and JavaScript basics.",
+          content: "Web development is an exciting field that combines creativity with technical skills...",
           published: true,
-          updatedAt: new Date()
+          updatedAt: new Date().toISOString()
         },
         {
-          l: "The Future of AI in Technology",
-          img: "https://images.unsplash.com/photo-1677442136019-21780ecad995",
-          content: "Artificial Intelligence is rapidly changing the technology landscape. From chatbots to autonomous vehicles, AI is becoming increasingly integrated into our daily lives.\n\nIn this post, we'll explore:\n- Current AI trends\n- Future predictions\n- Impact on jobs\n- Ethical considerations\n\nAs we move forward, it's crucial to understand both the potential and limitations of AI technology.",
-          description: "Exploring the impact of AI on the future of technology",
+          id: '2',
+          l: "5 Essential Design Principles",
+          img: "https://images.unsplash.com/photo-1558655146-9f40138edfeb",
+          description: "Learn the fundamental principles of good design that every developer should know.",
+          content: "Design is not just about making things look pretty...",
           published: true,
-          updatedAt: new Date()
-        },
-        {
-          l: "Building Sustainable Software",
-          img: "https://images.unsplash.com/photo-1518432031352-d6fc5c10da5a",
-          content: "Sustainable software development is about creating applications that are maintainable, scalable, and environmentally conscious.\n\nKey principles include:\n- Writing clean, maintainable code\n- Optimizing for performance\n- Reducing energy consumption\n- Using efficient algorithms\n\nBy following these principles, we can build better software that lasts longer and has a smaller environmental impact.",
-          description: "Best practices for creating sustainable and maintainable software",
-          published: true,
-          updatedAt: new Date()
-        },
-        {
-          l: "Modern UI Design Trends",
-          img: "https://images.unsplash.com/photo-1555066931-4365d14bab8c",
-          content: "The world of UI design is constantly evolving, with new trends emerging every year. In this post, we'll explore the latest design patterns and techniques that are shaping modern web interfaces.\n\nKey trends include:\n- Minimalist interfaces\n- Dark mode design\n- Micro-interactions\n- Glassmorphism\n- Responsive animations\n\nUnderstanding these trends helps create more engaging and user-friendly applications that meet modern design standards.",
-          description: "Exploring current trends in user interface design and modern web aesthetics",
-          published: true,
-          updatedAt: new Date()
+          updatedAt: new Date().toISOString()
         }
       ]
     }
@@ -440,6 +428,13 @@ const publish = async () => {
   // Navigate to the links page
   navigateTo('/links')
 };
+
+// Watch template changes
+watch(() => data.value.template, (newTemplate) => {
+  if (newTemplate === 'blog' && (!data.value.ls || !Array.isArray(data.value.ls))) {
+    data.value.ls = []
+  }
+}, { immediate: true })
 </script>
 
 <style>

@@ -104,7 +104,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { Icon } from '@iconify/vue'
 
 interface BlogPost {
@@ -114,6 +114,7 @@ interface BlogPost {
   description: string // short description
   published: boolean
   updatedAt: Date
+  id: string
 }
 
 interface Props {
@@ -132,12 +133,14 @@ const toggleMinimize = (index: number) => {
 const addPost = () => {
   const newPost: BlogPost = {
     l: '',
+    img: '',
     content: '',
     description: '',
     published: false,
-    updatedAt: new Date()
+    updatedAt: new Date(),
+    id: Date.now().toString()
   }
-  emit('update:modelValue', [...props.modelValue, newPost])
+  emit('update:modelValue', [...props.modelValue || [], newPost])
 }
 
 const removePost = (index: number) => {
@@ -155,6 +158,13 @@ const formatDate = (date: Date) => {
     year: 'numeric'
   }).format(date)
 }
+
+// Add watcher to ensure modelValue is initialized
+watch(() => props.modelValue, (newVal) => {
+  if (!newVal || !Array.isArray(newVal)) {
+    emit('update:modelValue', [])
+  }
+}, { immediate: true })
 </script>
 
 <style scoped>
