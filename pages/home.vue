@@ -9,7 +9,7 @@
       <!-- Header -->
       <div class="border-b bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="flex justify-between items-center py-4">
+          <div class="flex justify-between items-center py-4 pl-12 lg:pl-0">
             <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
           </div>
         </div>

@@ -128,51 +128,51 @@
         <div class="mt-16 grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-3">
           <!-- Feature 1 -->
           <div class="flex flex-col items-start">
-            <div class="rounded-lg bg-indigo-50 p-3">
-              <Icon icon="ph:layout-duotone" class="h-8 w-8 text-indigo-600" />
+            <div class="rounded-lg bg-indigo-50 p-4 sm:p-3">
+              <Icon icon="ph:layout-duotone" class="h-12 w-12 sm:h-8 sm:w-8 text-indigo-600" />
             </div>
-            <h3 class="mt-4 text-lg font-semibold text-gray-900">Multiple Templates</h3>
-            <p class="mt-2 text-gray-600">Choose from simple links, store layouts, or blog templates to showcase your content perfectly.</p>
+            <h3 class="mt-6 sm:mt-4 text-xl sm:text-lg font-semibold text-gray-900">Multiple Templates</h3>
+            <p class="mt-3 sm:mt-2 text-gray-600">Choose from simple links, store layouts, or blog templates to showcase your content perfectly.</p>
           </div>
           <!-- Feature 2 -->
           <div class="flex flex-col items-start">
-            <div class="rounded-lg bg-indigo-50 p-3">
-              <Icon icon="ph:paint-brush-duotone" class="h-8 w-8 text-indigo-600" />
+            <div class="rounded-lg bg-indigo-50 p-4 sm:p-3">
+              <Icon icon="ph:paint-brush-duotone" class="h-12 w-12 sm:h-8 sm:w-8 text-indigo-600" />
             </div>
-            <h3 class="mt-4 text-lg font-semibold text-gray-900">Theme Customization</h3>
-            <p class="mt-2 text-gray-600">Customize colors, fonts, and layouts to match your brand identity perfectly.</p>
+            <h3 class="mt-6 sm:mt-4 text-xl sm:text-lg font-semibold text-gray-900">Theme Customization</h3>
+            <p class="mt-3 sm:mt-2 text-gray-600">Customize colors, fonts, and layouts to match your brand identity perfectly.</p>
           </div>
           <!-- Feature 3 -->
           <div class="flex flex-col items-start">
-            <div class="rounded-lg bg-indigo-50 p-3">
-              <Icon icon="ph:chart-line-up-duotone" class="h-8 w-8 text-indigo-600" />
+            <div class="rounded-lg bg-indigo-50 p-4 sm:p-3">
+              <Icon icon="ph:chart-line-up-duotone" class="h-12 w-12 sm:h-8 sm:w-8 text-indigo-600" />
             </div>
-            <h3 class="mt-4 text-lg font-semibold text-gray-900">Analytics Dashboard</h3>
-            <p class="mt-2 text-gray-600">Track clicks, visitor locations, and engagement metrics to optimize your content.</p>
+            <h3 class="mt-6 sm:mt-4 text-xl sm:text-lg font-semibold text-gray-900">Analytics Dashboard</h3>
+            <p class="mt-3 sm:mt-2 text-gray-600">Track clicks, visitor locations, and engagement metrics to optimize your content.</p>
           </div>
           <!-- Feature 4 -->
           <div class="flex flex-col items-start">
-            <div class="rounded-lg bg-indigo-50 p-3">
-              <Icon icon="ph:shopping-cart-duotone" class="h-8 w-8 text-indigo-600" />
+            <div class="rounded-lg bg-indigo-50 p-4 sm:p-3">
+              <Icon icon="ph:shopping-cart-duotone" class="h-12 w-12 sm:h-8 sm:w-8 text-indigo-600" />
             </div>
-            <h3 class="mt-4 text-lg font-semibold text-gray-900">E-commerce Ready</h3>
-            <p class="mt-2 text-gray-600">Showcase and sell products directly through your bio link with our store template.</p>
+            <h3 class="mt-6 sm:mt-4 text-xl sm:text-lg font-semibold text-gray-900">E-commerce Ready</h3>
+            <p class="mt-3 sm:mt-2 text-gray-600">Showcase and sell products directly through your bio link with our store template.</p>
           </div>
           <!-- Feature 5 -->
           <div class="flex flex-col items-start">
-            <div class="rounded-lg bg-indigo-50 p-3">
-              <Icon icon="ph:pencil-duotone" class="h-8 w-8 text-indigo-600" />
+            <div class="rounded-lg bg-indigo-50 p-4 sm:p-3">
+              <Icon icon="ph:pencil-duotone" class="h-12 w-12 sm:h-8 sm:w-8 text-indigo-600" />
             </div>
-            <h3 class="mt-4 text-lg font-semibold text-gray-900">Blog Platform</h3>
-            <p class="mt-2 text-gray-600">Share your thoughts and stories with a built-in blog platform that looks great on any device.</p>
+            <h3 class="mt-6 sm:mt-4 text-xl sm:text-lg font-semibold text-gray-900">Blog Platform</h3>
+            <p class="mt-3 sm:mt-2 text-gray-600">Share your thoughts and stories with a built-in blog platform that looks great on any device.</p>
           </div>
           <!-- Feature 6 -->
           <div class="flex flex-col items-start">
-            <div class="rounded-lg bg-indigo-50 p-3">
-              <Icon icon="ph:devices-duotone" class="h-8 w-8 text-indigo-600" />
+            <div class="rounded-lg bg-indigo-50 p-4 sm:p-3">
+              <Icon icon="ph:devices-duotone" class="h-12 w-12 sm:h-8 sm:w-8 text-indigo-600" />
             </div>
-            <h3 class="mt-4 text-lg font-semibold text-gray-900">Mobile Optimized</h3>
-            <p class="mt-2 text-gray-600">Every template is fully responsive and looks perfect on any device or screen size.</p>
+            <h3 class="mt-6 sm:mt-4 text-xl sm:text-lg font-semibold text-gray-900">Mobile Optimized</h3>
+            <p class="mt-3 sm:mt-2 text-gray-600">Every template is fully responsive and looks perfect on any device or screen size.</p>
           </div>
         </div>
       </div>
@@ -273,10 +273,6 @@
               </li>
               <li class="flex items-center">
                 <Icon icon="ph:check-circle-fill" class="h-5 w-5 text-indigo-600" />
-                <span class="ml-3 text-sm text-gray-600">Custom domains</span>
-              </li>
-              <li class="flex items-center">
-                <Icon icon="ph:check-circle-fill" class="h-5 w-5 text-indigo-600" />
                 <span class="ml-3 text-sm text-gray-600">Priority support</span>
               </li>
             </ul>
@@ -303,6 +299,10 @@
               <li class="flex items-center">
                 <Icon icon="ph:check-circle-fill" class="h-5 w-5 text-indigo-600" />
                 <span class="ml-3 text-sm text-gray-600">Team collaboration</span>
+              </li>
+              <li class="flex items-center">
+                <Icon icon="ph:check-circle-fill" class="h-5 w-5 text-indigo-600" />
+                <span class="ml-3 text-sm text-gray-600">Custom Domains</span>
               </li>
               <li class="flex items-center">
                 <Icon icon="ph:check-circle-fill" class="h-5 w-5 text-indigo-600" />
