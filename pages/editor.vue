@@ -1,114 +1,125 @@
 <template>
-  <div class="h-screen w-full grid grid-cols-3 divide-x bg-slate-100">
-    <!-- Left section (editor) -->
-    <div class="col-span-2 flex flex-col h-full bg-white">
-      <!-- Add sidebar -->
-      <AppSidebar />
-
-      <!-- Buttons -->
-      <div class="flex items-center justify-end p-4 space-x-2">
+  <div class="min-h-screen w-full bg-slate-100">
+    <AppSidebar />
+    
+    <div class="lg:pl-64">
+      <!-- Mobile Preview Toggle -->
+      <div class="lg:hidden fixed bottom-4 right-4 z-50">
         <button
-          @click="prefillDemoData"
-          class="px-4 py-2 rounded-lg bg-gray-600 text-white shadow-lg hover:bg-gray-700 flex items-center space-x-2"
+          @click="showPreview = !showPreview"
+          class="bg-indigo-600 text-white rounded-full p-3 shadow-lg"
         >
-          <Icon icon="ph:plus-circle-bold" class="h-5 w-5" />
-          <span>Add demo data</span>
-        </button>
-        
-        <button
-          @click="publish"
-          class="px-4 py-2 rounded-lg bg-indigo-600 text-white shadow-lg hover:bg-indigo-700 flex items-center space-x-2"
-        >
-          <Icon icon="ph:paper-plane-tilt-bold" class="h-5 w-5" />
-          <span>Publish</span>
+          <Icon :icon="showPreview ? 'ph:pencil-bold' : 'ph:device-mobile-bold'" class="h-6 w-6" />
         </button>
       </div>
 
-      <!-- Form content -->
-      <div class="flex-grow overflow-y-auto">
-        <div class="max-w-4xl mx-auto p-8 space-y-8">
-          <!-- Template selector moved to top -->
-          <AppTemplateSelector v-model="data.template" />
-          <app-form-hr />
-          
-          <app-form-profile
-            v-model:name="data.n"
-            v-model:description="data.d"
-            v-model:image="data.i"
-          />
-          <app-form-hr />
-          <app-form-social-links
-            v-model:facebook="data.f"
-            v-model:twitter="data.t"
-            v-model:instagram="data.ig"
-            v-model:github="data.gh"
-            v-model:telegram="data.tg"
-            v-model:whatsapp="data.w"
-            v-model:youtube="data.y"
-            v-model:email="data.e"
-            v-model:linkedin="data.l"
-          />
-          <app-form-hr />
-          <component
-            :is="data.template === 'store' ? AppFormStoreProducts : data.template === 'blog' ? AppFormBlog : AppFormLinks"
-            v-model="data.ls"
-            :template="data.template"
-          />
-          <app-form-hr />
-          <ThemeCustomizer :template="data.template" />
-        </div>
-      </div>
-    </div>
-
-    <!-- Right section (preview) -->
-    <div class="bg-slate-100 relative">
-      <div class="sticky top-0 h-screen overflow-hidden">
+      <div class="h-full grid lg:grid-cols-3 divide-x">
+        <!-- Left section (editor) -->
         <div 
-          class="h-screen grid place-items-center"
-          :style="{ backgroundColor: theme.current.colors.background }"
+          class="lg:col-span-2 flex flex-col h-full bg-white"
+          v-show="!showPreview || !isMobile"
         >
-          <div
-            class="h-[729px] w-[340px] rounded-[3rem] overflow-hidden"
-            :class="[
-              theme.current.colors.background === '#1F2937' ? 'ring-8 ring-white/20' : 'ring-8 ring-slate-800'
-            ]"
-          >
-            <div 
-              class="h-full scrollbar-hide"
-              :class="{ 
-                'overflow-y-auto': data.template === 'simple',
-                'overflow-y-scroll': data.template === 'store' || data.template === 'blog'
-              }"
+          <!-- Buttons -->
+          <div class="flex items-center justify-end p-4 space-x-2">
+            <button
+              @click="prefillDemoData"
+              class="px-4 py-2 rounded-lg bg-gray-600 text-white shadow-lg hover:bg-gray-700 flex items-center space-x-2"
             >
-              <ThemeProvider 
-                class="h-full"
-                :style="{
-                  '--color-primary': theme.current.colors.primary,
-                  '--color-background': theme.current.colors.background,
-                  '--color-text': theme.current.colors.text,
-                  '--color-accent': theme.current.colors.accent,
-                  '--font-heading': theme.current.font.heading,
-                  '--font-body': theme.current.font.body,
-                  backgroundColor: theme.current.colors.background
-                }"
-              >
-                <component 
-                  :is="data.template === 'store' ? TemplateStore : data.template === 'blog' ? TemplateBlog : TemplateSimple" 
-                  :data="data" 
-                  :theme="theme.current"
-                />
-              </ThemeProvider>
+              <Icon icon="ph:plus-circle-bold" class="h-5 w-5" />
+              <span>Add demo data</span>
+            </button>
+            
+            <button
+              @click="publish"
+              class="px-4 py-2 rounded-lg bg-indigo-600 text-white shadow-lg hover:bg-indigo-700 flex items-center space-x-2"
+            >
+              <Icon icon="ph:paper-plane-tilt-bold" class="h-5 w-5" />
+              <span>Publish</span>
+            </button>
+          </div>
+
+          <!-- Form content -->
+          <div class="flex-grow overflow-y-auto">
+            <div class="max-w-4xl mx-auto p-4 lg:p-8 space-y-8">
+              <!-- Template selector moved to top -->
+              <AppTemplateSelector v-model="data.template" />
+              <app-form-hr />
+              
+              <app-form-profile
+                v-model:name="data.n"
+                v-model:description="data.d"
+                v-model:image="data.i"
+              />
+              <app-form-hr />
+              <app-form-social-links
+                v-model:facebook="data.f"
+                v-model:twitter="data.t"
+                v-model:instagram="data.ig"
+                v-model:github="data.gh"
+                v-model:telegram="data.tg"
+                v-model:whatsapp="data.w"
+                v-model:youtube="data.y"
+                v-model:email="data.e"
+                v-model:linkedin="data.l"
+              />
+              <app-form-hr />
+              <component
+                :is="data.template === 'store' ? AppFormStoreProducts : data.template === 'blog' ? AppFormBlog : AppFormLinks"
+                v-model="data.ls"
+                :template="data.template"
+              />
+              <app-form-hr />
+              <ThemeCustomizer :template="data.template" />
             </div>
           </div>
         </div>
-        <!-- Branding -->
-        <a
-          href="https://twitter.com/biolink-toast"
-          target="_blank"
-          class="fixed bottom-0 right-0 bg-white rounded-tl-lg shadow px-4 py-1 font-medium text-sm text-gray-500 hover:bg-slate-50 z-50"
+
+        <!-- Right section (preview) -->
+        <div 
+          class="bg-slate-100 relative"
+          v-show="showPreview || !isMobile"
         >
-          BIOLINK
-        </a>
+          <div class="sticky top-0 h-screen overflow-hidden">
+            <div 
+              class="h-screen grid place-items-center"
+              :style="{ backgroundColor: theme.current.colors.background }"
+            >
+              <div
+                class="h-[729px] w-[340px] rounded-[3rem] overflow-hidden"
+                :class="[
+                  theme.current.colors.background === '#1F2937' ? 'ring-8 ring-white/20' : 'ring-8 ring-slate-800'
+                ]"
+              >
+                <div 
+                  class="h-full scrollbar-hide"
+                  :class="{ 
+                    'overflow-y-auto': data.template === 'simple',
+                    'overflow-y-scroll': data.template === 'store' || data.template === 'blog'
+                  }"
+                >
+                  <ThemeProvider 
+                    class="h-full"
+                    :style="{
+                      '--color-primary': theme.current.colors.primary,
+                      '--color-background': theme.current.colors.background,
+                      '--color-text': theme.current.colors.text,
+                      '--color-accent': theme.current.colors.accent,
+                      '--font-heading': theme.current.font.heading,
+                      '--font-body': theme.current.font.body,
+                      backgroundColor: theme.current.colors.background
+                    }"
+                  >
+                    <component 
+                      :is="data.template === 'store' ? TemplateStore : data.template === 'blog' ? TemplateBlog : TemplateSimple" 
+                      :data="data" 
+                      :theme="theme.current"
+                    />
+                  </ThemeProvider>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -123,6 +134,10 @@ import AppFormBlog from '~/components/AppForm/Blog.vue'
 import TemplateSimple from '~/components/Templates/Simple.vue'
 import TemplateStore from '~/components/Templates/Store.vue'
 import TemplateBlog from '~/components/Templates/Blog.vue'
+
+// Responsive state
+const { isMobile } = useResponsive()
+const showPreview = ref(false)
 
 // Auth
 const client = useSupabaseClient()
