@@ -311,22 +311,18 @@ const logout = async () => {
 // Function to connect X account
 const connectX = async () => {
   try {
-    const { data, error } = await client.auth.signInWithOAuth({
+    const { data: { url }, error } = await client.auth.signInWithOAuth({
       provider: 'twitter',
       options: {
-        redirectTo: 'https://socialgathering.io/settings',
-        scopes: 'tweet.read tweet.write users.read'
+        redirectTo: 'https://grclwgupyulhuqwdpvxn.supabase.co/functions/v1/twitter-auth'
       }
     })
-    if (error) {
-      console.error('OAuth error:', error)
-      throw error
-    }
-    if (data?.url) {
-      window.location.href = data.url
-    }
-  } catch (err) {
-    console.error('Error connecting X account:', err)
+    
+    if (error) throw error
+    window.location.href = url
+  } catch (error) {
+    console.error('Error connecting Twitter:', error)
+    alert('Failed to connect Twitter account')
   }
 }
 

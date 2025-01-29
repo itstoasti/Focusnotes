@@ -279,6 +279,6 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 
 [auth.external.twitter]
 enabled = true
-client_id = "RcuctaTNk6IE5TaULcSxkdf5U"
-secret = "igHBR2KxNdvTS0RFlgOqhTs4m8nYyce9NfmUeEZ5Sq5XGP06uG"
-redirect_uri = "https://socialgathering.io/auth/callback"
+client_id = ""
+secret = "env(SUPABASE_AUTH_EXTERNAL_TWITTER_SECRET)"
+redirect_uri = "https://grclwgupyulhuqwdpvxn.supabase.co/functions/v1/twitter-auth"
