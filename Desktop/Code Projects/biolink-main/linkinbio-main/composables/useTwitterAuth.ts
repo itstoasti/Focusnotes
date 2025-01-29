@@ -35,7 +35,7 @@ export function useTwitterAuth() {
       // Get runtime config
       const config = useRuntimeConfig()
       const clientId = config.public.twitterClientId
-      console.log('Client ID available:', !!clientId)
+      console.log('Client ID:', clientId) // Log the actual client ID for debugging
 
       if (!clientId) {
         throw new Error('Twitter client ID not configured')
@@ -55,8 +55,8 @@ export function useTwitterAuth() {
       const url = `https://twitter.com/i/oauth2/authorize?${params.toString()}`
       console.log('Redirecting to Twitter OAuth URL:', url)
 
-      // Redirect to Twitter
-      window.location.href = url
+      // Use window.location.replace to prevent browser history issues
+      window.location.replace(url)
     } catch (error) {
       console.error('Error initiating Twitter OAuth:', error)
       throw error

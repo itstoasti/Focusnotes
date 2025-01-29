@@ -188,7 +188,6 @@ import { useTwitterAuth } from '~/composables/useTwitterAuth'
 // Auth
 const client = useSupabaseClient()
 const user = useSupabaseUser()
-const { connectX } = useTwitterAuth()
 
 // Define middleware
 definePageMeta({
@@ -347,6 +346,7 @@ const fetchXAccount = async () => {
 const handleTwitterConnect = async () => {
   try {
     console.log('Starting Twitter connection...')
+    const { connectX } = useTwitterAuth()
     await connectX()
   } catch (error) {
     console.error('Error connecting to Twitter:', error)
