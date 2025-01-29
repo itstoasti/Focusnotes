@@ -4,7 +4,6 @@ export default defineNuxtConfig({
         '@nuxtjs/tailwindcss',
         'nuxt-icon',
         '@vueuse/nuxt',
-        '@nuxtjs/supabase',
         '@pinia/nuxt'
     ],
     build: {
@@ -20,30 +19,14 @@ export default defineNuxtConfig({
             }
         }
     },
-    supabase: {
-        redirect: false,
-        cookieOptions: {
-            name: 'sb',
-            lifetime: 60 * 60 * 8,
-            domain: '',
-            path: '/',
-            sameSite: 'lax'
-        },
-        clientOptions: {
-            auth: {
-                flowType: 'pkce',
-                detectSessionInUrl: false,
-                persistSession: true,
-                autoRefreshToken: true
-            }
-        }
-    },
     runtimeConfig: {
         // Private keys are only available on the server
         twitterClientSecret: process.env.TWITTER_CLIENT_SECRET,
         // Public keys that are exposed to the client
         public: {
-            twitterClientId: process.env.TWITTER_CLIENT_ID
+            twitterClientId: process.env.TWITTER_CLIENT_ID,
+            supabaseUrl: process.env.SUPABASE_URL,
+            supabaseKey: process.env.SUPABASE_KEY
         }
     }
 })

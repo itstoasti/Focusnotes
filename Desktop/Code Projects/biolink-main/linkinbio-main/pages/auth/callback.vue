@@ -9,10 +9,28 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
-const client = useSupabaseClient()
+import { useSupabase } from '~/composables/useSupabase'
+
+const supabase = useSupabase()
+const user = ref(null)
+
+// Get current user
+const getCurrentUser = async () => {
+  const { data: { user: currentUser }, error } = await supabase.auth.getUser()
+  if (error) {
+    console.error('Error getting user:', error)
+    return
+  }
+  user.value = currentUser
+}
 
 onMounted(async () => {
   try {
+    await getCurrentUser()
+    if (!user.value) {
+      throw new Error('No authenticated user')
+    }
+
     console.log('Starting Twitter callback process')
     
     // Get the code and state from URL parameters
@@ -62,7 +80,7 @@ onMounted(async () => {
 
     // Store the Twitter account data in profiles
     console.log('Updating profile')
-    const { error: updateError } = await client
+    const { error: updateError } = await supabase
       .from('profiles')
       .update({
         x_account_data: {
@@ -73,7 +91,7 @@ onMounted(async () => {
           refresh_token: data.refreshToken
         }
       })
-      .eq('id', client.auth.user()?.id)
+      .eq('id', user.value.id)
 
     if (updateError) {
       console.error('Error updating profile:', updateError)

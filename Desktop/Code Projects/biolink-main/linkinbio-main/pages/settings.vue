@@ -184,10 +184,11 @@
 import { Icon } from '@iconify/vue'
 import { ref, onMounted } from 'vue'
 import { useTwitterAuth } from '~/composables/useTwitterAuth'
+import { useSupabase } from '~/composables/useSupabase'
 
 // Auth
-const client = useSupabaseClient()
-const user = useSupabaseUser()
+const supabase = useSupabase()
+const user = ref(null)
 
 // Define middleware
 definePageMeta({
@@ -200,12 +201,22 @@ const subscription = ref<{ status: string; details: any } | null>(null)
 const isLoading = ref(true)
 const xAccount = ref<{ username: string } | null>(null)
 
+// Get current user
+const getCurrentUser = async () => {
+  const { data: { user: currentUser }, error } = await supabase.auth.getUser()
+  if (error) {
+    console.error('Error getting user:', error)
+    return
+  }
+  user.value = currentUser
+}
+
 // Fetch subscription status
 const fetchSubscription = async () => {
   console.log('Fetching subscription for user:', user.value?.id)
   try {
     // Check profiles table for subscription status
-    const { data: profileData, error: profileError } = await client
+    const { data: profileData, error: profileError } = await supabase
       .from('profiles')
       .select('subscription_status, stripe_customer_id')
       .eq('id', user.value?.id)
@@ -220,7 +231,7 @@ const fetchSubscription = async () => {
     }
 
     // Check subscriptions table for detailed subscription info
-    const { data: subscriptionData, error: subscriptionError } = await client
+    const { data: subscriptionData, error: subscriptionError } = await supabase
       .from('subscriptions')
       .select('*, stripe_subscription_id, current_period_end')
       .eq('user_id', user.value?.id)
@@ -263,7 +274,7 @@ const handleSubscribe = async (plan: string) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${await client.auth.getSession().then(res => res.data.session?.access_token)}`,
+        Authorization: `Bearer ${await supabase.auth.getSession().then(res => res.data.session?.access_token)}`,
       },
       body: JSON.stringify({ plan }),
     })
@@ -279,7 +290,7 @@ const handleSubscribe = async (plan: string) => {
 const handleCancel = async () => {
   try {
     console.log('Starting subscription cancellation...');
-    const token = await client.auth.getSession().then(res => res.data.session?.access_token);
+    const token = await supabase.auth.getSession().then(res => res.data.session?.access_token);
     console.log('Got auth token:', !!token);
     
     const response = await fetch('/api/cancel-subscription', {
@@ -303,7 +314,7 @@ const handleCancel = async () => {
 
 // Sign out function
 const logout = async () => {
-  const { error } = await client.auth.signOut()
+  const { error } = await supabase.auth.signOut()
   if (!error) {
     navigateTo('/login')
   }
@@ -312,7 +323,7 @@ const logout = async () => {
 // Function to disconnect X account
 const disconnectX = async () => {
   try {
-    const { error } = await client
+    const { error } = await supabase
       .from('profiles')
       .update({ x_account_data: null })
       .eq('id', user.value?.id)
@@ -327,7 +338,7 @@ const disconnectX = async () => {
 // Function to fetch X account details
 const fetchXAccount = async () => {
   try {
-    const { data, error } = await client
+    const { data, error } = await supabase
       .from('profiles')
       .select('x_account_data')
       .eq('id', user.value?.id)
@@ -355,8 +366,11 @@ const handleTwitterConnect = async (event: Event) => {
   }
 }
 
-onMounted(() => {
-  fetchSubscription()
-  fetchXAccount()
+onMounted(async () => {
+  await getCurrentUser()
+  if (user.value) {
+    await fetchSubscription()
+    await fetchXAccount()
+  }
 })
 </script> 
