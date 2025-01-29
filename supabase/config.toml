@@ -99,7 +99,11 @@ enabled = true
 # in emails.
 site_url = "https://socialgathering.io"
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["https://socialgathering.io", "https://socialgathering.io/auth/callback"]
+additional_redirect_urls = [
+  "https://socialgathering.io",
+  "https://socialgathering.io/auth/callback",
+  "https://socialgathering.io/settings"
+]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # If disabled, the refresh token will never expire.
@@ -281,4 +285,4 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 enabled = true
 client_id = ""
 secret = "env(SUPABASE_AUTH_EXTERNAL_TWITTER_SECRET)"
-redirect_uri = "https://grclwgupyulhuqwdpvxn.supabase.co/functions/v1/twitter-auth"
+redirect_uri = "https://grclwgupyulhuqwdpvxn.supabase.co/auth/v1/callback"
