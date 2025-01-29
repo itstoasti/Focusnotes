@@ -24,78 +24,76 @@ serve(async (req: Request) => {
   try {
     // Get the code and state from the request URL
     const url = new URL(req.url)
-    console.log('Request URL:', url.toString())
-    const code = url.searchParams.get('code')
-    const state = url.searchParams.get('state')
+    console.log('Received callback URL:', url.toString())
+    
+    // For Twitter OAuth, we need to handle the callback differently
+    if (url.pathname === '/auth/v1/callback') {
+      const code = url.searchParams.get('code')
+      const state = url.searchParams.get('state')
 
-    if (!code) {
-      console.error('Authentication code missing from URL parameters')
-      throw new Error('No code provided')
-    }
+      if (!code) {
+        console.error('No code provided in callback')
+        throw new Error('No code provided')
+      }
 
-    // Get the authorization header
-    const authHeader = req.headers.get('Authorization')?.split(' ')[1]
-    if (!authHeader) {
-      console.error('Authorization header missing from request')
-      throw new Error('No authorization header')
-    }
+      // Create Supabase client
+      const supabaseClient = createClient(
+        Deno.env.get('SUPABASE_URL') || '',
+        Deno.env.get('SUPABASE_ANON_KEY') || '',
+        {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false,
+            detectSessionInUrl: false
+          }
+        }
+      )
+      console.log('Supabase client created')
 
-    // Create Supabase client
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') || '',
-      Deno.env.get('SUPABASE_ANON_KEY') || '',
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false,
-          detectSessionInUrl: false
+      // Exchange the code for OAuth tokens
+      const { data: { user }, error: authError } = await supabaseClient.auth.exchangeCodeForSession(code)
+      
+      if (authError) {
+        throw authError
+      }
+
+      if (!user) {
+        throw new Error('No user data received')
+      }
+
+      // Store Twitter account data in profiles
+      if (user.app_metadata?.provider === 'twitter') {
+        const { error: updateError } = await supabaseClient
+          .from('profiles')
+          .update({
+            x_account_data: {
+              username: user.user_metadata?.user_name,
+              name: user.user_metadata?.full_name,
+              avatar_url: user.user_metadata?.avatar_url
+            }
+          })
+          .eq('id', user.id)
+
+        if (updateError) {
+          throw updateError
         }
       }
-    )
 
-    // Exchange the code for OAuth tokens
-    console.log('Exchanging code for session...')
-    const { data: { user }, error: authError } = await supabaseClient.auth.exchangeCodeForSession(code)
-    
-    if (authError) {
-      console.error('Auth error during code exchange:', authError)
-      throw authError
+      // Redirect back to the settings page
+      return new Response(null, {
+        status: 302,
+        headers: {
+          ...corsHeaders,
+          Location: 'https://socialgathering.io/settings'
+        }
+      })
     }
 
-    if (!user) {
-      console.error('No user data received after successful code exchange')
-      throw new Error('No user data received')
-    }
-
-    console.log('Successfully authenticated user:', user.id)
-
-    // Store Twitter account data in profiles
-    if (user.app_metadata?.provider === 'twitter') {
-      const { error: updateError } = await supabaseClient
-        .from('profiles')
-        .update({
-          x_account_data: {
-            username: user.user_metadata?.user_name,
-            name: user.user_metadata?.full_name,
-            avatar_url: user.user_metadata?.avatar_url
-          }
-        })
-        .eq('id', user.id)
-
-      if (updateError) {
-        throw updateError
-      }
-    }
-
-    // Redirect back to the settings page
-    return new Response(null, {
-      status: 302,
-      headers: {
-        ...corsHeaders,
-        Location: 'https://socialgathering.io/settings'
-      }
+    // If not a callback, return 404
+    return new Response(JSON.stringify({ error: 'Not found' }), {
+      status: 404,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
-
   } catch (err: any) {
     console.error('Error:', err)
     return new Response(JSON.stringify({ error: err.message }), {

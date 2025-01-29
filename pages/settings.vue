@@ -314,7 +314,6 @@ const connectX = async () => {
     const { data: { url }, error } = await client.auth.signInWithOAuth({
       provider: 'twitter',
       options: {
-        redirectTo: 'https://grclwgupyulhuqwdpvxn.supabase.co/auth/v1/callback',
         scopes: 'tweet.read tweet.write users.read offline.access'
       }
     })
