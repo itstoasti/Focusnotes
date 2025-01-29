@@ -22,17 +22,20 @@ export default defineNuxtConfig({
     },
     supabase: {
         redirect: false,
-        redirectOptions: {
-            login: '/login',
-            callback: '/confirm',
-            exclude: ['/*'],
-        },
         cookieOptions: {
             name: 'sb',
             lifetime: 60 * 60 * 8,
             domain: '',
             path: '/',
             sameSite: 'lax'
+        },
+        clientOptions: {
+            auth: {
+                flowType: 'pkce',
+                detectSessionInUrl: false,
+                persistSession: true,
+                autoRefreshToken: true
+            }
         }
     },
     runtimeConfig: {
