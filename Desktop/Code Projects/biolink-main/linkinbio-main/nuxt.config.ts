@@ -20,6 +20,21 @@ export default defineNuxtConfig({
             }
         }
     },
+    supabase: {
+        redirect: false,
+        redirectOptions: {
+            login: '/login',
+            callback: '/confirm',
+            exclude: ['/*'],
+        },
+        cookieOptions: {
+            name: 'sb',
+            lifetime: 60 * 60 * 8,
+            domain: '',
+            path: '/',
+            sameSite: 'lax'
+        }
+    },
     runtimeConfig: {
         // Private keys are only available on the server
         twitterClientSecret: process.env.TWITTER_CLIENT_SECRET,

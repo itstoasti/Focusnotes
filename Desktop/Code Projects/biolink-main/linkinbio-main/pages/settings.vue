@@ -346,6 +346,7 @@ const fetchXAccount = async () => {
 // Function to handle Twitter connection
 const handleTwitterConnect = async () => {
   try {
+    console.log('Starting Twitter connection...')
     await connectX()
   } catch (error) {
     console.error('Error connecting to Twitter:', error)
