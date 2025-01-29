@@ -19,7 +19,7 @@ export function useTwitterAuth() {
 
   const connectX = async () => {
     try {
-      console.log('Starting Twitter OAuth flow...')
+      console.log('Starting direct Twitter OAuth flow...')
       
       // Generate and store PKCE values
       const codeVerifier = generateCodeVerifier()
@@ -35,28 +35,30 @@ export function useTwitterAuth() {
       // Get runtime config
       const config = useRuntimeConfig()
       const clientId = config.public.twitterClientId
-      console.log('Client ID:', clientId) // Log the actual client ID for debugging
+      console.log('Twitter Client ID:', clientId) // Log the actual client ID for debugging
 
       if (!clientId) {
         throw new Error('Twitter client ID not configured')
       }
 
-      // Construct Twitter OAuth URL
-      const params = new URLSearchParams({
-        response_type: 'code',
-        client_id: clientId,
-        redirect_uri: 'https://socialgathering.io/auth/callback',
-        scope: 'tweet.read tweet.write users.read offline.access',
-        state: state,
-        code_challenge: codeChallenge,
-        code_challenge_method: 'S256'
+      // Construct Twitter OAuth URL directly
+      const twitterAuthUrl = new URL('https://twitter.com/i/oauth2/authorize')
+      twitterAuthUrl.searchParams.append('response_type', 'code')
+      twitterAuthUrl.searchParams.append('client_id', clientId)
+      twitterAuthUrl.searchParams.append('redirect_uri', 'https://socialgathering.io/auth/callback')
+      twitterAuthUrl.searchParams.append('scope', 'tweet.read tweet.write users.read offline.access')
+      twitterAuthUrl.searchParams.append('state', state)
+      twitterAuthUrl.searchParams.append('code_challenge', codeChallenge)
+      twitterAuthUrl.searchParams.append('code_challenge_method', 'S256')
+
+      const url = twitterAuthUrl.toString()
+      console.log('Debug - Final URL:', {
+        constructed: url,
+        actual: window.location.href
       })
 
-      const url = `https://twitter.com/i/oauth2/authorize?${params.toString()}`
-      console.log('Redirecting to Twitter OAuth URL:', url)
-
-      // Use window.location.replace to prevent browser history issues
-      window.location.replace(url)
+      // Force redirect to Twitter
+      window.location.assign(url)
     } catch (error) {
       console.error('Error initiating Twitter OAuth:', error)
       throw error
