@@ -41,7 +41,7 @@
                 </div>
                 <button
                   v-if="!xAccount"
-                  @click.prevent="handleTwitterConnect"
+                  @click="handleTwitterConnect"
                   class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
                   Connect
@@ -343,11 +343,12 @@ const fetchXAccount = async () => {
 }
 
 // Function to handle Twitter connection
-const handleTwitterConnect = async () => {
+const handleTwitterConnect = async (event: Event) => {
+  event.preventDefault()
   try {
-    console.log('Starting Twitter connection...')
-    const { connectX } = useTwitterAuth()
-    await connectX()
+    console.log('Starting Twitter OAuth...')
+    const twitterAuth = useTwitterAuth()
+    await twitterAuth.connectTwitter()
   } catch (error) {
     console.error('Error connecting to Twitter:', error)
     alert('Failed to connect Twitter account')

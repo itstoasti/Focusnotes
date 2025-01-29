@@ -20,7 +20,7 @@ onMounted(async () => {
     const code = urlParams.get('code')
     const state = urlParams.get('state')
     
-    console.log('Received callback parameters:', { code: !!code, state })
+    console.log('Received callback parameters')
     
     if (!code) {
       throw new Error('No code provided')
@@ -34,14 +34,14 @@ onMounted(async () => {
 
     // Get the code verifier we stored earlier
     const codeVerifier = localStorage.getItem('twitter_code_verifier')
-    console.log('Retrieved code verifier:', !!codeVerifier)
+    console.log('Retrieved stored values')
     
     if (!codeVerifier) {
       throw new Error('No code verifier found')
     }
 
-    // Exchange the code for access token using our server endpoint
-    console.log('Calling token exchange endpoint')
+    // Exchange the code for access token
+    console.log('Exchanging code for token')
     const response = await fetch('/api/twitter-callback', {
       method: 'POST',
       headers: {
@@ -54,21 +54,23 @@ onMounted(async () => {
     })
 
     const data = await response.json()
-    console.log('Token exchange response:', data)
+    console.log('Token exchange completed')
     
     if (!data.success) {
       throw new Error(data.error || 'Failed to exchange token')
     }
 
     // Store the Twitter account data in profiles
-    console.log('Updating profile with Twitter data')
+    console.log('Updating profile')
     const { error: updateError } = await client
       .from('profiles')
       .update({
         x_account_data: {
           username: data.userData.username,
           name: data.userData.name,
-          avatar_url: data.userData.profile_image_url
+          profile_image_url: data.userData.profile_image_url,
+          access_token: data.accessToken,
+          refresh_token: data.refreshToken
         }
       })
       .eq('id', client.auth.user()?.id)
@@ -78,7 +80,7 @@ onMounted(async () => {
       throw updateError
     }
 
-    console.log('Successfully connected Twitter account')
+    console.log('Twitter account connected successfully')
 
     // Clean up
     localStorage.removeItem('twitter_code_verifier')
