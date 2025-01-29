@@ -19,17 +19,22 @@ export function useTwitterAuth() {
 
   const connectX = async () => {
     try {
+      console.log('Starting Twitter OAuth flow...')
+      
       // Generate and store PKCE values
       const codeVerifier = generateCodeVerifier()
       localStorage.setItem('twitter_code_verifier', codeVerifier)
       const codeChallenge = await generateCodeChallenge(codeVerifier)
+      console.log('Generated PKCE values')
 
       // Generate random state
       const state = generateCodeVerifier()
       localStorage.setItem('twitter_state', state)
+      console.log('Generated state')
 
       // Get runtime config
       const config = useRuntimeConfig()
+      console.log('Client ID available:', !!config.public.twitterClientId)
 
       // Construct Twitter OAuth URL
       const params = new URLSearchParams({
@@ -42,8 +47,11 @@ export function useTwitterAuth() {
         code_challenge_method: 'S256'
       })
 
+      const url = `https://twitter.com/i/oauth2/authorize?${params.toString()}`
+      console.log('Redirecting to:', url)
+
       // Redirect to Twitter
-      window.location.href = `https://twitter.com/i/oauth2/authorize?${params.toString()}`
+      window.location.href = url
     } catch (error) {
       console.error('Error initiating Twitter OAuth:', error)
       throw error
