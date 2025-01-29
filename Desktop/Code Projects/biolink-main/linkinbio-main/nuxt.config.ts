@@ -26,5 +26,13 @@ export default defineNuxtConfig({
             callback: '/confirm',
             exclude: ['/*'],
         }
+    },
+    runtimeConfig: {
+        // Private keys are only available on the server
+        twitterClientSecret: process.env.TWITTER_CLIENT_SECRET,
+        // Public keys that are exposed to the client
+        public: {
+            twitterClientId: process.env.TWITTER_CLIENT_ID
+        }
     }
 })

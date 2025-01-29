@@ -28,10 +28,13 @@ export function useTwitterAuth() {
       const state = generateCodeVerifier()
       localStorage.setItem('twitter_state', state)
 
+      // Get runtime config
+      const config = useRuntimeConfig()
+
       // Construct Twitter OAuth URL
       const params = new URLSearchParams({
         response_type: 'code',
-        client_id: process.env.TWITTER_CLIENT_ID as string,
+        client_id: config.public.twitterClientId,
         redirect_uri: 'https://socialgathering.io/auth/callback',
         scope: 'tweet.read tweet.write users.read offline.access',
         state: state,
