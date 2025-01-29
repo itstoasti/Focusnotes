@@ -15,7 +15,7 @@ onMounted(async () => {
   try {
     console.log('Starting Twitter callback process')
     
-    // Get the code from URL parameters
+    // Get the code and state from URL parameters
     const urlParams = new URLSearchParams(window.location.search)
     const code = urlParams.get('code')
     const state = urlParams.get('state')
@@ -24,6 +24,12 @@ onMounted(async () => {
     
     if (!code) {
       throw new Error('No code provided')
+    }
+
+    // Verify state matches
+    const savedState = localStorage.getItem('twitter_state')
+    if (state !== savedState) {
+      throw new Error('State mismatch - possible CSRF attack')
     }
 
     // Get the code verifier we stored earlier
@@ -76,6 +82,7 @@ onMounted(async () => {
 
     // Clean up
     localStorage.removeItem('twitter_code_verifier')
+    localStorage.removeItem('twitter_state')
 
     // Redirect back to settings
     navigateTo('/settings')

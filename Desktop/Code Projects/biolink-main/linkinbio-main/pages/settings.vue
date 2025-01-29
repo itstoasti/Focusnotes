@@ -183,10 +183,12 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { ref, onMounted } from 'vue'
+import { useTwitterAuth } from '~/composables/useTwitterAuth'
 
 // Auth
 const client = useSupabaseClient()
 const user = useSupabaseUser()
+const { connectX } = useTwitterAuth()
 
 // Define middleware
 definePageMeta({
@@ -305,38 +307,6 @@ const logout = async () => {
   const { error } = await client.auth.signOut()
   if (!error) {
     navigateTo('/login')
-  }
-}
-
-// Function to connect X account
-const connectX = async () => {
-  try {
-    // Generate a random state string for CSRF protection
-    const state = Math.random().toString(36).substring(7)
-    
-    // Generate a code verifier and challenge for PKCE
-    const codeVerifier = Math.random().toString(36).substring(7) + Math.random().toString(36).substring(7)
-    const codeChallenge = codeVerifier // Using 'plain' method for simplicity, in production use 'S256'
-    
-    // Store the code verifier in localStorage to use it later
-    localStorage.setItem('twitter_code_verifier', codeVerifier)
-    
-    // Construct the Twitter OAuth URL
-    const params = new URLSearchParams({
-      response_type: 'code',
-      client_id: process.env.TWITTER_CLIENT_ID || '', // Make sure this is set in your .env
-      redirect_uri: 'https://socialgathering.io/auth/callback',
-      scope: 'tweet.read tweet.write users.read offline.access',
-      state: state,
-      code_challenge: codeChallenge,
-      code_challenge_method: 'plain'
-    })
-    
-    const url = `https://x.com/i/oauth2/authorize?${params.toString()}`
-    window.location.href = url
-  } catch (error) {
-    console.error('Error connecting Twitter:', error)
-    alert('Failed to connect Twitter account')
   }
 }
 
